@@ -9,13 +9,15 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.astroganit.api.entities.Role;
 import com.astroganit.api.repository.RoleRepo;
 
 @SpringBootApplication
 @EnableCaching
-
+@ComponentScan(basePackages = "com.astroganit")
+@EnableJpaRepositories(basePackages = "com.astroganit.api.repository")
 public class AstroGanitApiNewApplication implements CommandLineRunner {
 	@Autowired
 	private RoleRepo roleRepo;
