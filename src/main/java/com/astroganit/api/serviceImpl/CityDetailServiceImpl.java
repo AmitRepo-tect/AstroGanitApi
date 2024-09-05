@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CityDetailServiceImpl implements CityDetailService {
-   Logger logger = LoggerFactory.getLogger(CityDetailServiceImpl.class);
+	Logger logger = LoggerFactory.getLogger(CityDetailServiceImpl.class);
    @Autowired
    private CityDetailsRepo cityDetailRepo;
    @Autowired
