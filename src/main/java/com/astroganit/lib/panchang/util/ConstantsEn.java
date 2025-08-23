@@ -186,7 +186,7 @@ public class ConstantsEn implements IConstants {
 	public final String[] masas = { "Chaitra", "Vaisakha", "Jyeshtha", "Ashadha", "Shravan", "Bhadrapada", "Ashwin",
 			"Kartika", "Margashirsha", "Pausha", "Magha", "Phalguna" };
 	public final String[] adhikMasas = { "Chaitra", "Vaisakha", "Jyeshtha", "Ashadha", "Shravan", "Bhadrapada", "Ashwin",
-			"Kartika", "Margashirsha", "Pausha", "Magha", "Adhik" };
+			"Kartika", "Margashirsha", "Pausha", "Magha","Phalguna", "Adhik" };
 
 	// base 0
 	public final String[] varas = { "Ravivara", "Somavara", "Mangalavara", "Buddhavara", "Guruvara", "Shukravara",

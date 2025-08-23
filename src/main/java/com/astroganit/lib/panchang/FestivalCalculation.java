@@ -1,7 +1,10 @@
 package com.astroganit.lib.panchang;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -30,10 +33,10 @@ public class FestivalCalculation extends PanchangBase {
 
 	// var festivalDayMapJD: HashMap<String, Double> = HashMap()
 	HashMap<String, FestivalDetail> festivalDetailMap = new HashMap();
-	String[] rashi ;
-	String[] ekadashiK ;
-	String[] ekadashiS ;
-	String[] hindiMonth ;
+	String[] rashi;
+	String[] ekadashiK;
+	String[] ekadashiS;
+	String[] hindiMonth;
 	ArrayList<FestivalDetail> festDetails = new ArrayList<FestivalDetail>();
 
 	public FestivalCalculation(int languageCode) {
@@ -49,13 +52,14 @@ public class FestivalCalculation extends PanchangBase {
 	}
 
 	ArrayList<FestivalDetail> festivalsInYear(int yearOfPanchang) {
-		year = yearOfPanchang;
+		year = 2025;// yearOfPanchang;
 		arraySize = 368;
 		sun_month = new int[arraySize];
 		moon_month = new int[arraySize];
 		tithi_sunrise = new int[arraySize];
 		nakshatram_sunrise = new int[arraySize];
 		jd = baseCalculationNew.panchangCalculation.toJulian(year - 1, 12, 31);
+
 		this.assignArrays(jd);
 		return this.festivalsFindMap();
 	}
@@ -63,6 +67,7 @@ public class FestivalCalculation extends PanchangBase {
 	void assignArrays(double jdP) {
 		for (int i = 0; i < arraySize; i++) {
 			double sunRiseJd = baseCalculationNew.panchangCalculation.sunriseJd(jdP + (double) i);
+
 			sun_month[i] = baseCalculationNew.panchangCalculation.solarMonth(sunRiseJd);
 			tithi_sunrise[i] = baseCalculationNew.panchangCalculation.getTithiD(sunRiseJd);
 			nakshatram_sunrise[i] = (int) baseCalculationNew.panchangCalculation.nakshatra(jdP + (double) i)[0];
@@ -73,6 +78,11 @@ public class FestivalCalculation extends PanchangBase {
 				moon_month[i] = 13;
 			}
 		}
+	}
+
+	String convertJDtoDate(double jd) {
+		int[] arr = baseCalculationNew.panchangCalculation.fromJulian(jd);
+		return arr[0] + "--" + arr[1] + "--" + arr[2];
 	}
 
 	ArrayList<FestivalDetail> festivalsFindMap() {
@@ -97,8 +107,10 @@ public class FestivalCalculation extends PanchangBase {
 			double doubleSunSet = baseCalculationNew.panchangCalculation.getSunSet(doubleDateJd);
 			double doubleSunSetNextDay = baseCalculationNew.panchangCalculation.getSunSet(doubleDateJd + 1.0);
 			int intWeekDay = baseCalculationNew.panchangCalculation.vaara(doubleDateJd);
+
 			int t_10;
 			if (intSunMonth == 1 && intSunMonthPrevDay == 12) {
+
 				t_10 = baseCalculationNew.panchangCalculation.solarMonth(doubleDateJd - 0.0104);
 				if (t_10 == 1) {
 					addFestivalToList("baisakhi", new FestivalDetail(constants.baisakhi, doubleDateJd - 1.0,
@@ -107,9 +119,14 @@ public class FestivalCalculation extends PanchangBase {
 					addFestivalToList("baisakhi", new FestivalDetail(constants.baisakhi, doubleDateJd,
 							EnumContainer.FestType.FESTIVALS, "holidays/img_baishakhi.png"));
 				}
+
+				convertJDtoDate(doubleDateJd);
+
 			}
+
 			if ((intSunMonth == 5) && (sun_month[i + 2] == 5)
 					&& (intNakshatraSunRise == 21 || intNakshatraSunRise == 22)) {
+
 				if (intNakshatraSunRise == 21 && intNakshatraSunRiseNextDay == 22) {
 					addFestivalToList("onam", new FestivalDetail(constants.onam, doubleDateJd + 1.0,
 							EnumContainer.FestType.FESTIVALS, "holidays/img_onam.png"));
@@ -126,7 +143,11 @@ public class FestivalCalculation extends PanchangBase {
 				sMonth = sankrantiMonth - 1;
 			else
 				sMonth = 12;
+
 			if (intSunMonth == sankrantiMonth && intSunMonthPrevDay == sMonth) {
+				// System.out.println("Sankranti:" + "-" + i +"-"+ intSunMonth + "-" +
+				// intSunMonthPrevDay+"--"+sMonth+"--"+sankrantiMonth + "-" + doubleDateJd);
+
 				if (sankrantiMonth != 4 && sankrantiMonth != 10) {
 					t_10 = baseCalculationNew.panchangCalculation.solarMonth(doubleDateJd - 0.0104);
 					if (t_10 == sankrantiMonth) {
@@ -145,6 +166,9 @@ public class FestivalCalculation extends PanchangBase {
 				}
 			}
 			if (intSunMonth == 10 && intSunMonthPrevDay == 9) {
+				// System.out.println("Sankranti:" +"-"+ intSunMonth + "-" + intSunMonthPrevDay
+				// +"--"+sMonth+"--"+sankrantiMonth+ "-" + doubleDateJd);
+
 				t_10 = baseCalculationNew.panchangCalculation
 						.solarMonth(baseCalculationNew.panchangCalculation.sunriseJd(doubleDateJd) - 0.67);
 				if (t_10 == 10) {
@@ -180,11 +204,16 @@ public class FestivalCalculation extends PanchangBase {
 				}
 			}
 			if (intSunMonth == 4 && intSunMonthPrevDay == 3) {
+				// System.out.println("Sankranti" + "-" + i +"-"+ intSunMonth + "-" +
+				// intSunMonthPrevDay +"--"+sMonth+"--"+sankrantiMonth+ "-" + doubleDateJd);
 				addFestivalToList("sankranti_4", new FestivalDetail(rashi[4] + " " + constants.sankranti,
 						doubleDateJd - 1.0, EnumContainer.FestType.SANKRANTI, null));
 			}
 			String key;
 			if (intTithiSunrise == 11 || intTithiSunrise == 12) {
+				// System.out.println("Ekadashi:" +"-"+ doubleDateJd+ "-" +
+				// intTithiSunrise+"--"+intMoonMonth);
+
 				key = "ekadashi_1_$intMoonMonth";
 				if (intTithiSunriseNextDay == 11) {
 					putKeyInMapCheckContainNew(key, doubleDateJd + 1.0, intMoonMonth - 1, ekadashiS,
@@ -722,6 +751,7 @@ public class FestivalCalculation extends PanchangBase {
 				t_10 = baseCalculationNew.panchangCalculation.getTithiD(doubleDateJd
 						+ baseCalculationNew.muhuratCalculation.getDayDivisons(doubleDateJd, doubleSunRise, 15)[3]
 								/ 24.0);
+
 				if (intTithiSunrise == 15 && t_10 == 15) {
 					addFestivalToList("raksha_bandhan", new FestivalDetail(constants.rakshaBandhan, doubleDateJd,
 							EnumContainer.FestType.FESTIVALS, "holidays/img_raksha_bandhan.png"));
@@ -1242,7 +1272,7 @@ public class FestivalCalculation extends PanchangBase {
 			}
 
 			if (intMoonMonth == 11 && (intTithiSunrise == 28 || intTithiSunrise == 29)
-					&& !festivalDetailMap.containsKey("maha_shivratri")) {
+			/* && !festivalDetailMap.containsKey("maha_shivratri") */) {
 				t_10 = baseCalculationNew.panchangCalculation.getTithiD(doubleDateJd
 						+ baseCalculationNew.muhuratCalculation.getNightDivisons(doubleDateJd, doubleSunSet, 15)[7]
 								/ 24.0);
@@ -1252,6 +1282,10 @@ public class FestivalCalculation extends PanchangBase {
 				t_21 = baseCalculationNew.panchangCalculation
 						.getTithiD(doubleDateJd + 1.0 + baseCalculationNew.muhuratCalculation
 								.getNightDivisons(doubleDateJd + 1.0, doubleSunSetNextDay, 15)[8] / 24.0);
+				
+				  System.out.println("doubleDateJd-" + convertJDtoDate(doubleDateJd) + " t10-"
+				  + t_10 + " t11-" + t_12 + " t12-" + t_21);
+				 
 				if (t_10 != 29 && t_12 != 29) {
 					addFestivalToList("maha_shivratri", new FestivalDetail(constants.mahaShivratri, doubleDateJd + 1.0,
 							EnumContainer.FestType.FESTIVALS, "holidays/img_shivji.png"));
@@ -1280,7 +1314,13 @@ public class FestivalCalculation extends PanchangBase {
 				t_22 = baseCalculationNew.panchangCalculation
 						.getTithiD(doubleDateJd + 1.0 + baseCalculationNew.muhuratCalculation
 								.getDayDivisons(doubleDateJd + 1.0, doubleSunRiseNextDay, 5)[5] / 24.0);
+				System.out.println("JD-" + convertJDtoDate(doubleDateJd) + " t10-" + t_10 + " t_12-" + t_12 + " t21-"
+						+ t_21 + " t22-" + t_22 + " dd-"
+						+ baseCalculationNew.muhuratCalculation.getDayDivisons(doubleDateJd - 1.0,
+								baseCalculationNew.panchangCalculation.getSunRise(doubleDateJd - 1.0), 5)[2]
+						+ " sr-" + baseCalculationNew.panchangCalculation.getSunRise(doubleDateJd - 1.0));
 				if (t_12 == 5 || t_21 == 5) {
+
 					if (t_22 == 5) {
 						addFestivalToList("vasant_panchami", new FestivalDetail(constants.vasantPanchami,
 								doubleDateJd + 1.0, EnumContainer.FestType.FESTIVALS, null));

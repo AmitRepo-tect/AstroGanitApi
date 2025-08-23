@@ -8,6 +8,7 @@ import com.astroganit.api.model.muhurat.MuhuratResponse;
 import com.astroganit.api.payload.Response;
 import com.astroganit.lib.panchang.model.BhadraResponse;
 import com.astroganit.lib.panchang.model.FestivalResponse;
+import com.astroganit.lib.panchang.model.FestivalResponseNew;
 import com.astroganit.lib.panchang.model.PanchakResponse;
 import com.astroganit.lib.panchang.model.PanchangRequest;
 import com.astroganit.lib.panchang.model.PanchangResponse;
@@ -23,4 +24,7 @@ public interface PanchangService {
 	MuhuratResponse getMuhurats(String sId) throws IOException;
 	
 	FestivalResponse getFestDetail(PanchangRequest panchangRequest) throws IOException;
+
+	FestivalResponseNew getFestDetailNew(int year,int language) throws IOException;
+
 }

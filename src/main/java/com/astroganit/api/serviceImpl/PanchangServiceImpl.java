@@ -22,6 +22,7 @@ import com.astroganit.lib.panchang.ChogdiyaCalculation;
 import com.astroganit.lib.panchang.DailyPanchangCalculation;
 import com.astroganit.lib.panchang.DoGhatiCalculation;
 import com.astroganit.lib.panchang.FestivalCalculation;
+import com.astroganit.lib.panchang.FestivalCalculationNew;
 import com.astroganit.lib.panchang.HoraCalculation;
 import com.astroganit.lib.panchang.PanchakCalculation;
 import com.astroganit.lib.panchang.RahuKaalCalculation;
@@ -30,6 +31,7 @@ import com.astroganit.lib.panchang.model.BhadraResponse;
 import com.astroganit.lib.panchang.model.ChogdiyaResponse;
 import com.astroganit.lib.panchang.model.DoGhatiResponse;
 import com.astroganit.lib.panchang.model.FestivalResponse;
+import com.astroganit.lib.panchang.model.FestivalResponseNew;
 import com.astroganit.lib.panchang.model.HoraResponse;
 import com.astroganit.lib.panchang.model.PanchakResponse;
 import com.astroganit.lib.panchang.model.PanchakTimeBean;
@@ -114,7 +116,6 @@ public class PanchangServiceImpl implements PanchangService {
 		calendar.set(Calendar.DATE, 0);
 		calendar.set(Calendar.MONTH, panchangInputModel.getDateTimeInfo().getMonth());
 		calendar.set(Calendar.YEAR, panchangInputModel.getDateTimeInfo().getYear());
-		System.out.println(panchangInputModel.getDateTimeInfo().getMonth());
 		BhadraResponse bhadraResponse = new BhadraResponse();
 		BhadraCalculation bhadraCalculation = new BhadraCalculation(languageCode);
 		ArrayList<BhadraBean> arrayList = bhadraCalculation.getBhadraData(calendar, languageCode);
@@ -129,7 +130,7 @@ public class PanchangServiceImpl implements PanchangService {
 		FestivalResponse festivalResponse = new FestivalResponse();
 		FestivalCalculation festivalCalculation = new FestivalCalculation(languageCode);
 		festivalResponse.setFestDetail(
-				festivalCalculation.getFestivalList(panchangInputModel.getDateTimeInfo().getYear(), languageCode));
+				festivalCalculation.getFestivalList(2031/*panchangInputModel.getDateTimeInfo().getYear()*/, languageCode));
 		return festivalResponse;
 	}
 
@@ -149,9 +150,11 @@ public class PanchangServiceImpl implements PanchangService {
 			path = "json/muhurat/muhurat_bhumi_pujan_2025" + ".json";
 		} else if (id == 5) {
 			path = "json/muhurat/muhurat_grah_pravesh_2025" + ".json";
+		} else if (id == 6) {
+			path = "json/muhurat/muhurat_mundan2025" + ".json";
+		} else if (id == 7) {
+			path = "json/muhurat/muhurat_bhumi_pujan_2025" + ".json";
 		}
-
-		String file = "";
 
 		try {
 			ObjectMapper mapper = new ObjectMapper();
@@ -161,10 +164,20 @@ public class PanchangServiceImpl implements PanchangService {
 			muhuratResponse.setMuhuratDetail(list);
 
 		} catch (Exception e) {
-			 e.printStackTrace();
+			e.printStackTrace();
 			throw new RuntimeException("Failed to read muhurat data", e);
 		}
 		return muhuratResponse;
 	}
+
+	@Override
+	public FestivalResponseNew getFestDetailNew(int year,int language) throws IOException {
+		FestivalResponseNew festivalResponse = new FestivalResponseNew();
+		FestivalCalculationNew festivalCalculationNew = new FestivalCalculationNew(language);
+		festivalResponse.setFestDetail(
+				festivalCalculationNew.getFestivalList(year, language));
+		return festivalResponse;
+	}
+
 
 }

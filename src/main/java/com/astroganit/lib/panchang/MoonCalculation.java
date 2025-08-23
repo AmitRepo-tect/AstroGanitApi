@@ -77,7 +77,6 @@ public class MoonCalculation extends BaseCalculation {
 		w -= 9.4E-4D * Math.sin(m - 2.0D * d + g);
 		w -= 9.2E-4D * Math.sin(2.0D * m - 2.0D * d);
 		double s = w / Math.sqrt(u - v * v);
-		System.out.println(s + "--" + (h + Math.atan(s / Math.sqrt(1.0D - s * s))));
 		this.sky[0] = h + Math.atan(s / Math.sqrt(1.0D - s * s));
 		s = v / Math.sqrt(u);
 		this.sky[1] = Math.atan(s / Math.sqrt(1.0D - s * s));

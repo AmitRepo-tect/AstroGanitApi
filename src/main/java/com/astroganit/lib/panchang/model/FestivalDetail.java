@@ -1,5 +1,7 @@
 package com.astroganit.lib.panchang.model;
 
+import java.util.Objects;
+
 import com.astroganit.lib.panchang.util.EnumContainer;
 
 public class FestivalDetail {
@@ -51,5 +53,20 @@ public class FestivalDetail {
 
 	public void setImgUrl(String imgUrl) {
 		this.imgUrl = imgUrl != null ? imgUrl : "";
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof FestivalDetail))
+			return false;
+		FestivalDetail that = (FestivalDetail) o;
+		return Objects.equals(festName, that.festName);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(festName);
 	}
 }

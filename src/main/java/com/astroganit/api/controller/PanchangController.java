@@ -12,6 +12,7 @@ import com.astroganit.api.payload.Response;
 import com.astroganit.api.service.PanchangService;
 import com.astroganit.lib.panchang.model.BhadraResponse;
 import com.astroganit.lib.panchang.model.FestivalResponse;
+import com.astroganit.lib.panchang.model.FestivalResponseNew;
 import com.astroganit.lib.panchang.model.PanchakResponse;
 import com.astroganit.lib.panchang.model.PanchangRequest;
 import com.astroganit.lib.panchang.model.PanchangResponse;
@@ -35,7 +36,7 @@ public class PanchangController {
 		PanchangResponse panchangResponse = null;
 		try {
 			panchangResponse = this.panchangService.getPanchang(request);
-		} catch (IOException e) { // TODO
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
@@ -69,6 +70,7 @@ public class PanchangController {
 
 		return ResponseEntity.ok(bhadraResponse);
 	}
+	
 
 	@GetMapping({ "/muhurat/{sId}" })
 	public ResponseEntity<MuhuratResponse> getMuhurats(@PathVariable String sId) {
@@ -87,6 +89,16 @@ public class PanchangController {
 		FestivalResponse festivalResponse = null;
 		try {
 			festivalResponse = this.panchangService.getFestDetail(request);
+		} catch (IOException e) { // TODO
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(festivalResponse);
+	}
+	@GetMapping("/festivalsNew/{year}/{language}")
+	public ResponseEntity<FestivalResponseNew> getFestivalListNew(@PathVariable int year,@PathVariable int language) {
+		FestivalResponseNew festivalResponse = null;
+		try {
+			festivalResponse = this.panchangService.getFestDetailNew(year,language);
 		} catch (IOException e) { // TODO
 			e.printStackTrace();
 		}
