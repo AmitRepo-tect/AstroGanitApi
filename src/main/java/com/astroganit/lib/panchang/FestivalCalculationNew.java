@@ -142,7 +142,7 @@ public class FestivalCalculationNew extends PanchangBase {
 			} else {
 				moonMonthPrevDay = 13;
 			}
-			FestivalDetail festivalDetail = calculateChathPooja();
+			FestivalDetail festivalDetail = calculateJanmashtami();
 
 			if (festivalDetail != null) {
 				hashMap.put("onam", festivalDetail);
@@ -511,21 +511,21 @@ public class FestivalCalculationNew extends PanchangBase {
 	FestivalDetail calculateJanmashtami() {
 		int t10, t12, t21, t22;
 		if (moonMonth == 5 && (tithiSunrise == 22 || tithiSunrise == 23)) {
-			t10 = baseCalculationNew.panchangCalculation
-					.getTithiD(jd + baseCalculationNew.muhuratCalculation.getNightDivisons(jd, sunSet, 15)[7] / 24.0);
-			t12 = baseCalculationNew.panchangCalculation
-					.getTithiD(jd + baseCalculationNew.muhuratCalculation.getNightDivisons(jd, sunSet, 15)[8] / 24.0);
-			t21 = baseCalculationNew.panchangCalculation.getTithiD((jd + 1.0)
-					+ baseCalculationNew.muhuratCalculation.getNightDivisons((jd + 1.0), sunSetNextDay, 15)[7] / 24.0);
-			t22 = baseCalculationNew.panchangCalculation.getTithiD((jd + 1.0)
-					+ baseCalculationNew.muhuratCalculation.getNightDivisons((jd + 1.0), sunSetNextDay, 15)[8] / 24.0);
-			if ((t10 == 23 || t12 == 23) && (t21 == 23 || t22 == 23)) {
-				return new FestivalDetail(constants.janmashtami, jd + 1.0, EnumContainer.FestType.FESTIVALS,
-						"holidays/img_janmastmi.png");
-			} else if ((t10 == 23 || t12 == 23) && t21 != 23) {
-				return new FestivalDetail(constants.janmashtami, jd, EnumContainer.FestType.FESTIVALS,
-						"holidays/img_janmastmi.png");
-			}
+			t10 = baseCalculationNew.panchangCalculation.getTithiD(jd + sunSetND15[7] / 24.0);
+			t12 = baseCalculationNew.panchangCalculation.getTithiD(jd + sunSetND15[8] / 24.0);
+			t21 = baseCalculationNew.panchangCalculation.getTithiD((jd + 1.0) + sunSetNDND15[7] / 24.0);
+			t22 = baseCalculationNew.panchangCalculation.getTithiD((jd + 1.0) + sunSetNDND15[8] / 24.0);
+			boolean dayHas23 = (tithiSunrise == 23) || (t10 == 23) || (t12 == 23);
+			boolean dayHas24 = (tithiSunrise == 24) || (t10 == 24) || (t12 == 24);
+			boolean nextHas24 = (tithiSunriseNextDay == 24) || (t21 == 24) || (t22 == 24);
+			boolean nextHas25 = (tithiSunriseNextDay == 25) || (t21 == 25) || (t22 == 25);
+			double festDate = ((dayHas23 && nextHas24) || (dayHas24 && nextHas25)) ? jd : -1;
+
+			return (festDate != -1)
+					? new FestivalDetail(constants.janmashtami, festDate, EnumContainer.FestType.FESTIVALS,
+							"holidays/img.png")
+					: null;
+
 		}
 		return null;
 	}
@@ -614,6 +614,92 @@ public class FestivalCalculationNew extends PanchangBase {
 
 	}
 
+	FestivalDetail calculateAshwinNavratri() {
+		if (moonMonth == 7 && moonMonthPrevDay != 7) {
+			if (tithiSunrise == 2) {
+				return new FestivalDetail(constants.ashwinNavratri, jd - 1.0, EnumContainer.FestType.FESTIVALS,
+						"holidays/img_navratri.png");
+			}
+			return new FestivalDetail(constants.ashwinNavratri, jd, EnumContainer.FestType.FESTIVALS,
+					"holidays/img_navratri.png");
+		}
+		return null;
+	}
+
+	FestivalDetail calculateAshwinNavratriParana() {
+
+		if (moonMonth == 7) {
+			double festDate = -1;
+			if (tithiSunrise == 9 && tithiSunrisePrevDay == 7) {
+				if (paranaVart(jd, tithiSunrise)) {
+					festDate = jd;
+				} else {
+					festDate = jd + 1.0;
+				}
+			} else if (tithiSunrise == 10 && tithiSunrisePrevDay == 8) {
+				festDate = jd;
+
+			} else if (tithiSunrise == 9 && tithiSunriseNextDay == 10) {
+				if (paranaVart(jd, tithiSunrise)) {
+					festDate = jd;
+				} else {
+					festDate = jd + 1.0;
+				}
+			} else if (tithiSunrise == 9 && tithiSunriseNextDay == 11) {
+				festDate = jd;
+
+			} else if (tithiSunrise == 9 && tithiSunriseNextDay == 9) {
+				festDate = jd + 1.0;
+			}
+			if (festDate != -1) {
+				return new FestivalDetail(constants.ashwinNavratriParana, festDate, EnumContainer.FestType.FESTIVALS,
+						"holidays/img_navratri.png");
+			}
+
+		}
+		return null;
+	}
+
+	FestivalDetail calculateAshwinNavratriDurgaVisarjan() {
+
+		if (moonMonth == 7) {
+			double festDate = -1;
+			System.out.println("JD:" + convertJDtoDate(jd) + " tithiSunrise" + tithiSunrise + " tithiSunrisePrevDay"
+					+ tithiSunrisePrevDay + " tithiSunriseNextDay" + tithiSunriseNextDay);
+
+			if (tithiSunrise == 9 && tithiSunrisePrevDay == 7) {
+				if (paranaVart(jd, tithiSunrise)) {
+					return new FestivalDetail(constants.ashwinNavratriDurgaVisarjan, jd + 1.0,
+							EnumContainer.FestType.FESTIVALS, "holidays/img_navratri.png");
+				} else {
+					return new FestivalDetail(constants.ashwinNavratriDurgaVisarjan, jd + 1.0,
+							EnumContainer.FestType.FESTIVALS, "holidays/img_navratri.png");
+				}
+			} else if (tithiSunrise == 10 && tithiSunrisePrevDay == 8) {
+
+				return new FestivalDetail(constants.ashwinNavratriDurgaVisarjan, jd, EnumContainer.FestType.FESTIVALS,
+						"holidays/img_navratri.png");
+
+			} else if (tithiSunrise == 9 && tithiSunriseNextDay == 10) {
+				if (paranaVart(jd, tithiSunrise)) {
+					return new FestivalDetail(constants.ashwinNavratriDurgaVisarjan, jd + 1.0,
+							EnumContainer.FestType.FESTIVALS, "holidays/img_navratri.png");
+				} else {
+					return new FestivalDetail(constants.ashwinNavratriDurgaVisarjan, jd + 1.0,
+							EnumContainer.FestType.FESTIVALS, "holidays/img_navratri.png");
+				}
+			} else if (tithiSunrise == 9 && tithiSunriseNextDay == 11) {
+				return new FestivalDetail(constants.ashwinNavratriDurgaVisarjan, jd, EnumContainer.FestType.FESTIVALS,
+						"holidays/img_navratri.png");
+			} else if (tithiSunrise == 9 && tithiSunriseNextDay == 9) {
+				return new FestivalDetail(constants.ashwinNavratriDurgaVisarjan, jd + 1.0,
+						EnumContainer.FestType.FESTIVALS, "holidays/img_navratri.png");
+			}
+
+		}
+		return null;
+	}
+
 	FestivalDetail calculateChaitraNavratriGhatasthapana(int moonMonth, int moonMonthPrevDay, int tithiSunrise) {
 		if (moonMonth == 1 && moonMonthPrevDay != 1) {
 			if (tithiSunrise == 2) {
@@ -666,76 +752,36 @@ public class FestivalCalculationNew extends PanchangBase {
 
 	FestivalDetail calculateVijyaDashmi() {
 		int t10, t12, t21, t22;
-		/*
-		 * if (moonMonth == 7) { if (tithiSunrise == 9 || tithiSunrise == 10) {
-		 * 
-		 * t10 = baseCalculationNew.panchangCalculation.getTithiD(jd + sunRiseDD5[3] /
-		 * 24.0); t12 = baseCalculationNew.panchangCalculation.getTithiD(jd +
-		 * sunRiseDD5[4] / 24.0); t21 =
-		 * baseCalculationNew.panchangCalculation.getTithiD(jd + 1.0 + sunRiseDDND5[1] /
-		 * 24.0); t22 = baseCalculationNew.panchangCalculation.getTithiD(jd + 1.0 +
-		 * sunRiseDDND5[3] / 24.0); boolean isSravanNak = false; if
-		 * (nakshatraSunRiseNextDay == 22 && (nakshatraSunRiseNextDayET >
-		 * sunRiseDDND5[3])) { isSravanNak = true; } System.out.println(jd + ":" +
-		 * convertJDtoDate(jd) + " t10:" + t10 + " t12:" + t12 + " t21:" + t21 + " t22:"
-		 * + t22 + " isSravanNak:" + isSravanNak + " tithiSunrise:" + tithiSunrise +
-		 * " tithiSunriseNextDay:" + tithiSunriseNextDay); double festDate = -1; if
-		 * (tithiSunrise == 9 && tithiSunriseNextDay == 11) { festDate = jd; } else if
-		 * (t10 == 10 && t21 != 10) { festDate = jd; } else if (t10 == 10 && t21 == 10
-		 * && isSravanNak) { festDate = jd + 1.0; } else if (t10 == 10 && t21 == 10 &&
-		 * !isSravanNak) { festDate = jd; } else if (t12 == 10 && t22 != 10) { festDate
-		 * = jd; } else if (t12 == 10 && t22 == 10 && isSravanNak) { festDate = jd +
-		 * 1.0; } if (festDate != -1) { return new
-		 * FestivalDetail(constants.vijayaDashami, festDate,
-		 * EnumContainer.FestType.FESTIVALS, "holidays/img_dushera.png"); } } }
-		 */
 
-		if (moonMonth == 7 && (tithiSunrise == 9 || tithiSunrise == 10)) {
-			System.out.println(jd + ":" + convertJDtoDate(jd));
-			t10 = baseCalculationNew.panchangCalculation
-					.getTithiD(jd + baseCalculationNew.muhuratCalculation.getDayDivisons(jd, sunRise, 5)[3] / 24.0);
-			t12 = baseCalculationNew.panchangCalculation
-					.getTithiD(jd + baseCalculationNew.muhuratCalculation.getDayDivisons(jd, sunRise, 5)[4] / 24.0);
-			t21 = baseCalculationNew.panchangCalculation.getTithiD(jd + 1.0
-					+ baseCalculationNew.muhuratCalculation.getDayDivisons(jd + 1.0, sunRiseNextDay, 5)[3] / 24.0);
-			t22 = baseCalculationNew.panchangCalculation.getTithiD(jd + 1.0
-					+ baseCalculationNew.muhuratCalculation.getDayDivisons(jd + 1.0, sunRiseNextDay, 5)[1] / 24.0);
-			boolean isSravanNak = false;
-			if (tithiSunriseNextDay == 10 && nakshatraSunRiseNextDay == 22) {
-				double nakET = baseCalculationNew.panchangCalculation.nakshatra(jd + 1.0)[1];
-				double aprhanT = baseCalculationNew.muhuratCalculation.getDayDivisons(jd + 1.0, sunRiseNextDay, 5)[3];
-				if (nakET > aprhanT) {
+		if (moonMonth == 7) {
+			if (tithiSunrise == 9 || tithiSunrise == 10) {
+
+				t10 = baseCalculationNew.panchangCalculation.getTithiD(jd + sunRiseDD5[3] / 24.0);
+				t12 = baseCalculationNew.panchangCalculation.getTithiD(jd + sunRiseDD5[4] / 24.0);
+				t21 = baseCalculationNew.panchangCalculation.getTithiD(jd + 1.0 + sunRiseDDND5[1] / 24.0);
+				t22 = baseCalculationNew.panchangCalculation.getTithiD(jd + 1.0 + sunRiseDDND5[3] / 24.0);
+				boolean isSravanNak = false;
+				if (nakshatraSunRise == 22 && (nakshatraSunRiseET > sunRiseDD5[3])) {
 					isSravanNak = true;
 				}
-			}
+				System.out.println(jd + ":" + convertJDtoDate(jd) + " tithiSunrise:" + tithiSunrise
+						+ " tithiSunriseNextDay:" + tithiSunriseNextDay + " isSravanNak:" + isSravanNak);
+				System.out.println(
+						jd + ":" + convertJDtoDate(jd) + " t10:" + t10 + " t12:" + t12 + " t21:" + t21 + " t22:" + t22);
 
-			if (t10 != 10 && t21 != 10 && isSravanNak) {
-				return new FestivalDetail(constants.vijayaDashami, jd + 1.0, EnumContainer.FestType.FESTIVALS,
-						"holidays/img_dushera.png");
-			} else if (t10 == 10 && t21 != 10 && isSravanNak) {
-				return new FestivalDetail(constants.vijayaDashami, jd + 1.0, EnumContainer.FestType.FESTIVALS,
-						"holidays/img_dushera.png");
-			} else if (t10 == 10 && t21 != 10 && !isSravanNak) {
-				return new FestivalDetail(constants.vijayaDashami, jd, EnumContainer.FestType.FESTIVALS,
-						"holidays/img_dushera.png");
-			} else if (t12 != 10 && t21 == 10 && isSravanNak) {
-				return new FestivalDetail(constants.vijayaDashami, jd + 1.0, EnumContainer.FestType.FESTIVALS,
-						"holidays/img_dushera.png");
-			} else if (t12 == 10 && t22 == 10 && nakshatraSunRiseNextDay == 22) {
-				return new FestivalDetail(constants.vijayaDashami, jd + 1.0, EnumContainer.FestType.FESTIVALS,
-						"holidays/img_dushera.png");
-			} else if (t10 == 10 && t21 == 10) {
-				return new FestivalDetail(constants.vijayaDashami, jd, EnumContainer.FestType.FESTIVALS,
-						"holidays/img_dushera.png");
-			} else if (t10 != 10 && t21 == 10) {
-				return new FestivalDetail(constants.vijayaDashami, jd + 1.0, EnumContainer.FestType.FESTIVALS,
-						"holidays/img_dushera.png");
-			} else if (t10 == 10 && t21 != 10) {
-				return new FestivalDetail(constants.vijayaDashami, jd, EnumContainer.FestType.FESTIVALS,
-						"holidays/img_dushera.png");
-			} else if (t10 != 10 && t21 != 10) {
-				return new FestivalDetail(constants.vijayaDashami, jd, EnumContainer.FestType.FESTIVALS,
-						"holidays/img_dushera.png");
+				double festDate = -1;
+				if (isSravanNak && ((t10 == 10 || t12 == 10) || (t10 == 11 || t12 == 11))) {
+					festDate = jd;
+				} else if (!isSravanNak && tithiSunrise == 10 && t12 == 10) {
+					festDate = jd;
+				} else if (!isSravanNak && t10 == 10 && t12 == 10) {
+					festDate = jd;
+				}
+
+				if (festDate != -1) {
+					return new FestivalDetail(constants.vijayaDashami, festDate, EnumContainer.FestType.FESTIVALS,
+							"holidays/img_dushera.png");
+				}
 			}
 		}
 
@@ -782,22 +828,6 @@ public class FestivalCalculationNew extends PanchangBase {
 		}
 		return null;
 	}
-
-	/*
-	 * FestivalDetail calculateDiwaliPoojaCalendar() { int t10, t12, t21, t22;
-	 * 
-	 * if (moonMonth == 7 && (tithiSunrise == 27 || tithiSunrise == 28)) { t10 =
-	 * baseCalculationNew.panchangCalculation.getTithiD(jd + sunSetND5[0] / 24.0);
-	 * t12 = baseCalculationNew.panchangCalculation.getTithiD(jd + sunSetND5[1] /
-	 * 24.0); t21 = baseCalculationNew.panchangCalculation.getTithiD(jd + 1.0 +
-	 * sinSetNDND5[0] / 24.0); t22 =
-	 * baseCalculationNew.panchangCalculation.getTithiD(jd + 1.0 + sinSetNDND5[1] /
-	 * 24.0);
-	 * 
-	 * if (t10 == 28 || t12 == 28) { { double festDate = (t21 != 28 && t22 != 28) ?
-	 * jd : jd + 1.0; return new FestivalDetail(constants.diwaliPujaCalendar,
-	 * festDate); } } } return null; }
-	 */
 
 	FestivalDetail calculateNarakChaturdshi() {
 		int t10, t12, t21, t22;
@@ -1173,4 +1203,17 @@ public class FestivalCalculationNew extends PanchangBase {
 
 	}
 
+	boolean paranaVart(double jd, double tithi) {
+		double[] tithiParana = baseCalculationNew.panchangCalculation.tithi(jd);
+		double sunSet = baseCalculationNew.panchangCalculation.getSunSet(jd);
+		boolean boolVal;
+		if ((int) tithi == (int) tithiParana[0]) {
+			boolVal = (tithiParana[1] <= sunSet);
+		} else if (tithiParana.length > 2 && (int) tithi == (int) tithiParana[2]) {
+			boolVal = (tithiParana[3] <= sunSet);
+		} else {
+			boolVal = true;
+		}
+		return boolVal;
+	}
 }
