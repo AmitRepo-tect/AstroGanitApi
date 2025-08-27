@@ -104,4 +104,14 @@ public class PanchangController {
 		}
 		return ResponseEntity.ok(festivalResponse);
 	}
+	@GetMapping("/vrat/{year}/{language}")
+	public ResponseEntity<FestivalResponseNew> getVratList(@PathVariable int year,@PathVariable int language) {
+		FestivalResponseNew festivalResponse = null;
+		try {
+			festivalResponse = this.panchangService.getVrat(year,language);
+		} catch (IOException e) { // TODO
+			e.printStackTrace();
+		}
+		return ResponseEntity.ok(festivalResponse);
+	}
 }

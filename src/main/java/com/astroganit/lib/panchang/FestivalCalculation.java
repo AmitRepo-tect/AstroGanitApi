@@ -324,6 +324,8 @@ public class FestivalCalculation extends PanchangBase {
 				t_23 = baseCalculationNew.panchangCalculation
 						.getTithiD(doubleDateJd + 1.0 + baseCalculationNew.muhuratCalculation
 								.getNightDivisons(doubleDateJd + 1.0, doubleSunSetNextDay, 5)[1] / 24.0);
+				System.out.println("JD-"+doubleDateJd+" ND-"+baseCalculationNew.muhuratCalculation.getNightDivisons(doubleDateJd, doubleSunSet, 5)[0]);
+				System.out.println("JD-"+convertJDtoDate(doubleDateJd)+" t12-"+t_12+" t21-"+t_21+" t22-"+t_22+" t23-"+t_23);
 				if (t_12 == 13 || t_21 == 13) {
 					if (t_22 == 13 && t_23 == 13) {
 						this.putKeyInMapCheckContainNew(key, doubleDateJd + 1.0, intMoonMonth, constants.pradoshS,

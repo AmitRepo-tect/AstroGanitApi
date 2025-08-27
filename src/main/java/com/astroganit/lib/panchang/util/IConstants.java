@@ -67,6 +67,8 @@ public interface IConstants {
 	public String republicDay = "गणतंत्र दिवस";
 	public String subhasChandraBoseJayanti = "सुभाष चंद्र बोस जयंती";
 	public String durgaPujaAstmi = "दुर्गा महा अष्टमी पूजा";
+	public String chathPooja = "छठ पूजा";
+	
 
 	/// <summary>
 	///

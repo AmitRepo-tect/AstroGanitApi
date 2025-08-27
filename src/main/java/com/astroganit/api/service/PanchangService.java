@@ -22,9 +22,11 @@ public interface PanchangService {
 	BhadraResponse getBhadraData(PanchangRequest panchangInputModel) throws IOException;
 
 	MuhuratResponse getMuhurats(String sId) throws IOException;
-	
+
 	FestivalResponse getFestDetail(PanchangRequest panchangRequest) throws IOException;
 
-	FestivalResponseNew getFestDetailNew(int year,int language) throws IOException;
+	FestivalResponseNew getFestDetailNew(int year, int language) throws IOException;
+
+	FestivalResponseNew getVrat(int year, int language) throws IOException;
 
 }

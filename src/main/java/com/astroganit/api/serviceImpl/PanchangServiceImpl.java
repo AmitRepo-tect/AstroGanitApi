@@ -129,8 +129,8 @@ public class PanchangServiceImpl implements PanchangService {
 		int languageCode = panchangRequest.getLangCode();
 		FestivalResponse festivalResponse = new FestivalResponse();
 		FestivalCalculation festivalCalculation = new FestivalCalculation(languageCode);
-		festivalResponse.setFestDetail(
-				festivalCalculation.getFestivalList(2031/*panchangInputModel.getDateTimeInfo().getYear()*/, languageCode));
+		festivalResponse.setFestDetail(festivalCalculation
+				.getFestivalList(2031/* panchangInputModel.getDateTimeInfo().getYear() */, languageCode));
 		return festivalResponse;
 	}
 
@@ -171,13 +171,19 @@ public class PanchangServiceImpl implements PanchangService {
 	}
 
 	@Override
-	public FestivalResponseNew getFestDetailNew(int year,int language) throws IOException {
+	public FestivalResponseNew getFestDetailNew(int year, int language) throws IOException {
 		FestivalResponseNew festivalResponse = new FestivalResponseNew();
 		FestivalCalculationNew festivalCalculationNew = new FestivalCalculationNew(language);
-		festivalResponse.setFestDetail(
-				festivalCalculationNew.getFestivalList(year, language));
+		festivalResponse.setFestDetail(festivalCalculationNew.getFestivalList(year, language));
 		return festivalResponse;
 	}
 
+	@Override
+	public FestivalResponseNew getVrat(int year, int language) throws IOException {
+		FestivalResponseNew festivalResponse = new FestivalResponseNew();
+		FestivalCalculationNew festivalCalculationNew = new FestivalCalculationNew(language);
+		festivalResponse.setFestDetail(festivalCalculationNew.getVratList(year, language));
+		return festivalResponse;
+	}
 
 }
