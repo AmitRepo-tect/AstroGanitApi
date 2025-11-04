@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping({"/api/place"})
-@CrossOrigin(origins = "http://64.227.131.121")
+//@CrossOrigin(origins = "http://64.227.131.121")
 public class CityDetailController {
    @Autowired
    private CityDetailService cityDetailService;

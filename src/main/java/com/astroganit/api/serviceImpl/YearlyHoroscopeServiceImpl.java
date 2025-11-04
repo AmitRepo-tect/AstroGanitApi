@@ -11,6 +11,10 @@ import com.astroganit.api.util.HUtil;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -80,63 +84,105 @@ public class YearlyHoroscopeServiceImpl implements YearlyHoroscopeService {
 		JSONParser parser = new JSONParser();
 
 		try {
-			Resource resource;
-			System.out.println(year + "" + (year == "2024"));
-			if (year.equals("2024")) {
-				resource = new ClassPathResource("/json/horoscope/yearly_horoscope_old.json");
-			} else {
-				resource = new ClassPathResource("/json/horoscope/yearly_horoscope_new.json");
-			}
+		    Resource resource;
+		    if (year.equals("2025")) {
+		        resource = new ClassPathResource("json/horoscope/yearly_horoscope_old.json");
+		    } else {
+		        resource = new ClassPathResource("json/horoscope/yearly_horoscope_new.json");
+		    }
 
-			Object obj = parser.parse(new FileReader(resource.getFile()));
-			// Adjust the path to your JSON file
-			JSONArray jsonArray = (JSONArray) obj;
-			JSONObject jsonObject;
-			YearlyHoroscopeAspect24 YHA;
-			for (int i = 0; i < jsonArray.size(); i++) {
-				YHA = new YearlyHoroscopeAspect24();
-				jsonObject = (JSONObject) jsonArray.get(i);
-				YHA.setBusiness(jsonObject.get("business").toString());
-				YHA.setCarrer(jsonObject.get("carrer").toString());
-				YHA.setEducation(jsonObject.get("education").toString());
-				YHA.setFamily(jsonObject.get("family").toString());
-				YHA.setFinance(jsonObject.get("finance").toString());
-				YHA.setHealth(jsonObject.get("health").toString());
-				YHA.setLove(jsonObject.get("love").toString());
-				YHA.setMarriage(jsonObject.get("marriage").toString());
-				listYearlyAspect.add(YHA);
-			}
+		    // ✅ Don't use getFile(), use getInputStream()
+		    try (InputStream inputStream = resource.getInputStream();
+		         Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+
+		        Object obj = parser.parse(reader);
+		        JSONArray jsonArray = (JSONArray) obj;
+		        JSONObject jsonObject;
+		        YearlyHoroscopeAspect24 YHA;
+
+		        for (int i = 0; i < jsonArray.size(); i++) {
+		            YHA = new YearlyHoroscopeAspect24();
+		            jsonObject = (JSONObject) jsonArray.get(i);
+		            YHA.setBusiness(jsonObject.get("business").toString());
+		            YHA.setCarrer(jsonObject.get("carrer").toString());
+		            YHA.setEducation(jsonObject.get("education").toString());
+		            YHA.setFamily(jsonObject.get("family").toString());
+		            YHA.setFinance(jsonObject.get("finance").toString());
+		            YHA.setHealth(jsonObject.get("health").toString());
+		            YHA.setLove(jsonObject.get("love").toString());
+		            YHA.setMarriage(jsonObject.get("marriage").toString());
+		            listYearlyAspect.add(YHA);
+		        }
+		    }
 
 		} catch (Exception e) {
-			e.printStackTrace();
+		    e.printStackTrace();
 		}
 
 		return listYearlyAspect;
 	}
-
 	@Cacheable(cacheNames = { "YearlyHoroscopeEn" }, key = "{#year}")
-	public Response getYearlyHoroscopeEn(String year) {
-		Response response = new Response();
-		String path = "json/horoscope/yearly_horoscope_new.json";
-		String file = "";
+	public List<YearlyHoroscopeAspect24> getYearlyHoroscopeEn(String year) {
+		List<YearlyHoroscopeAspect24> listYearlyAspect = new ArrayList<YearlyHoroscopeAspect24>();
+		JSONParser parser = new JSONParser();
 
 		try {
-			file = HUtil.readFile(path);
-			response.setResultCode(1);
-			response.setMessage("");
-			response.setErrorMessage("");
-			response.setStatus(HttpStatus.OK);
-			response.setData(Arrays.asList(file));
-		} catch (IOException var7) {
-			response.setResultCode(0);
-			response.setMessage("getting exception while getting the json on given slok number");
-			response.setErrorMessage(var7.getMessage());
-			response.setStatus(HttpStatus.BAD_REQUEST);
-			response.setData(Arrays.asList());
+		    Resource resource;
+		    if (year.equals("2025")) {
+		        resource = new ClassPathResource("json/horoscope/yearly_horoscope_old.json");
+		    } else {
+		        resource = new ClassPathResource("json/horoscope/yearly_horoscope_new_en.json");
+		    }
+
+		    // ✅ Don't use getFile(), use getInputStream()
+		    try (InputStream inputStream = resource.getInputStream();
+		         Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+
+		        Object obj = parser.parse(reader);
+		        JSONArray jsonArray = (JSONArray) obj;
+		        JSONObject jsonObject;
+		        YearlyHoroscopeAspect24 YHA;
+
+		        for (int i = 0; i < jsonArray.size(); i++) {
+		            YHA = new YearlyHoroscopeAspect24();
+		            jsonObject = (JSONObject) jsonArray.get(i);
+		            YHA.setBusiness(jsonObject.get("business").toString());
+		            YHA.setCarrer(jsonObject.get("carrer").toString());
+		            YHA.setEducation(jsonObject.get("education").toString());
+		            YHA.setFamily(jsonObject.get("family").toString());
+		            YHA.setFinance(jsonObject.get("finance").toString());
+		            YHA.setHealth(jsonObject.get("health").toString());
+		            YHA.setLove(jsonObject.get("love").toString());
+		            YHA.setMarriage(jsonObject.get("marriage").toString());
+		            listYearlyAspect.add(YHA);
+		        }
+		    }
+
+		} catch (Exception e) {
+		    e.printStackTrace();
 		}
 
-		return response;
+		return listYearlyAspect;
 	}
+	
+	
+	/*
+	 * @Cacheable(cacheNames = { "YearlyHoroscopeEn" }, key = "{#year}") public
+	 * Response getYearlyHoroscopeEn(String year) { Response response = new
+	 * Response(); String path = "json/horoscope/yearly_horoscope_new.json"; String
+	 * file = "";
+	 * 
+	 * try { file = HUtil.readFile(path); response.setResultCode(1);
+	 * response.setMessage(""); response.setErrorMessage("");
+	 * response.setStatus(HttpStatus.OK); response.setData(Arrays.asList(file)); }
+	 * catch (IOException var7) { response.setResultCode(0); response.
+	 * setMessage("getting exception while getting the json on given slok number");
+	 * response.setErrorMessage(var7.getMessage());
+	 * response.setStatus(HttpStatus.BAD_REQUEST);
+	 * response.setData(Arrays.asList()); }
+	 * 
+	 * return response; }
+	 */
 
 	@Cacheable(cacheNames = { "YearlyHoroscopeAspect24" }, key = "{#year,#langCode}")
 	public List<YearlyHoroscopeAspect24> getYearlyHoroscope24(String year, String langCode) {

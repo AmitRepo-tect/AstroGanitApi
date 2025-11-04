@@ -179,7 +179,7 @@ public class UserServiceImpl implements UserService {
       return response;
    }
 
-   public void deleteUser(Integer userId) {
+   public void deleteUser(Long userId) {
       User user = (User)this.userRepo.findById(userId).orElseThrow(() -> {
          return new ResourceNotFoundException("user", "id", (long)userId);
       });

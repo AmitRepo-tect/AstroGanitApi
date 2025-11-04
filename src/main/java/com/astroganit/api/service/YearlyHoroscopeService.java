@@ -9,8 +9,10 @@ public interface YearlyHoroscopeService {
 	/* List<YearlyHoroscopeAspect> getYearlyHoroscope(String year); */
 
 	List<YearlyHoroscopeAspect24> getYearlyHoroscopeHi(String year);
-
-	Response getYearlyHoroscopeEn(String year);
+	
+	List<YearlyHoroscopeAspect24> getYearlyHoroscopeEn(String year);
+	
+	/* Response getYearlyHoroscopeEn(String year); */
 
 	List<YearlyHoroscopeAspect24> getYearlyHoroscope24(String year, String langCode);
 }

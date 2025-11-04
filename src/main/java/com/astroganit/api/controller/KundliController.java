@@ -21,7 +21,7 @@ import com.astroganit.lib.horo.model.PlaceDetail;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://64.227.131.121")
+//@CrossOrigin(origins = "http://64.227.131.121")
 
 public class KundliController {
 	@Autowired(required = true)

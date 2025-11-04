@@ -19,7 +19,7 @@ import com.astroganit.lib.panchang.model.PanchangResponse;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:4200")
+//@CrossOrigin(origins = "http://localhost:4200")
 //@CrossOrigin(origins = "http://64.227.131.121")
 public class PanchangController {
 	@Autowired(required = true)

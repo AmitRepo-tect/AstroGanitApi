@@ -24,7 +24,7 @@ public interface UserService {
 
    Response validateOTP(OTPDto otpDto);
 
-   void deleteUser(Integer userId);
+   void deleteUser(Long userId);
 
    Response deactivateUser(String mobile);
 

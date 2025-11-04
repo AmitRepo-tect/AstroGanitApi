@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping({ "/api" })
 //@CrossOrigin(origins = "http://64.227.131.121")
-@CrossOrigin(origins = "http://localhost:4200")
+//@CrossOrigin(origins = "http://localhost:4200")
 public class DailyHoroscopeController {
 	@Autowired
 	private DailyHoroscopeService dailyService;
@@ -72,7 +72,13 @@ public class DailyHoroscopeController {
 	@GetMapping({ "/yearlyHoroscope/{year}/{langCode}" })
 	public ResponseEntity<List<YearlyHoroscopeAspect24>> getYearlyHoroscopeNew(@PathVariable("year") String year,
 			@PathVariable("langCode") String langCode) {
-		List<YearlyHoroscopeAspect24> yearlyHoroscope = this.yearlyService.getYearlyHoroscopeHi(year);
+		List<YearlyHoroscopeAspect24> yearlyHoroscope; 
+		if (langCode.equals("1")) {
+			yearlyHoroscope = this.yearlyService.getYearlyHoroscopeEn(year);
+		} else {
+			yearlyHoroscope = this.yearlyService.getYearlyHoroscopeHi(year);
+		}
+	
 		return yearlyHoroscope == null ? ResponseEntity.status(HttpStatus.NOT_FOUND).build()
 				: ResponseEntity.status(HttpStatus.OK).body(yearlyHoroscope);
 	}

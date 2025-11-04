@@ -28,7 +28,7 @@ public class UserController {
    }
 
    @PostMapping({"/delete/{userId}"})
-   public ResponseEntity<?> deleteUser(@PathVariable Integer userId) {
+   public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
       this.userService.deleteUser(userId);
       return new ResponseEntity(new ApiResponse("user deleted successfully"), HttpStatus.OK);
    }

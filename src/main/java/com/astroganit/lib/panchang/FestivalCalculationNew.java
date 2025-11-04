@@ -1531,7 +1531,6 @@ public class FestivalCalculationNew extends PanchangBase {
 		if (sunMonth != preSunMonth) {
 			int t10 = baseCalculationNew.panchangCalculation.solarMonth(jd - 0.0104);
 			double festDate = (sunMonth == t10) ? jd - 1.0 : jd;
-
 			return new FestivalDetail(rashi[sunMonth] + " " + constants.sankranti, festDate,
 					EnumContainer.FestType.SANKRANTI, null);
 		}
