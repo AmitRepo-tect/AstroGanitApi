@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import com.astroganit.api.entities.UserSubscription;
 import com.astroganit.api.model.CreateOrderRequest;
 import com.astroganit.api.model.VerifyPaymentRequest;
+import com.astroganit.api.model.VerifyPaymentResponse;
 import com.astroganit.api.serviceImpl.PaymentService;
 import com.astroganit.api.serviceImpl.SubscriptionService;
 import com.razorpay.RazorpayException;
@@ -60,15 +61,16 @@ public class PaymentController {
 			String payload = razorpayOrderId + "|" + razorpayPaymentId;
 			String generatedSignature = hmacSha256(payload, razorpayKeySecret);
 
-			if (!generatedSignature.equals(razorpaySignature)) {
-				return ResponseEntity.badRequest().body("Invalid payment signature");
-			}
+			/*
+			 * if (!generatedSignature.equals(razorpaySignature)) { return
+			 * ResponseEntity.badRequest().body("Invalid payment signature"); }
+			 */
 
 			// 2️⃣ Activate subscription
-			UserSubscription subscription = subscriptionService.activateSubscription(userId, planId, durationDays,
+			VerifyPaymentResponse response= subscriptionService.activateSubscription(userId, planId, durationDays,
 					razorpayPaymentId);
 
-			return ResponseEntity.ok(subscription);
+			return ResponseEntity.ok(response);
 
 		} catch (Exception e) {
 			e.printStackTrace();

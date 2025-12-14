@@ -8,25 +8,29 @@ import com.astroganit.api.payload.UserDto;
 
 @Service
 public interface UserService {
-   UserDto registerNewUser(UserDto user);
+	UserDto registerNewUser(UserDto user);
 
-   Response updateUserProfile(UserDto user, String userId);
+	Response updateUserProfile(UserDto user);
 
-   Boolean checkMobileNumberExit(String mobile);
+	Boolean checkMobileNumberExit(String mobile);
 
-   Response loginUser(UserDto userDto);
+	Response loginUser(UserDto userDto);
 
-   Response updatePassword(UserDto userDto);
+	Response updatePassword(UserDto userDto);
 
-   Response sendOTP(String mobile);
+	Response sendOTP(String mobile);
 
-   String sendOTPForLoginSignup(String mobile);
+	String sendOTPForLoginSignup(String mobile);
 
-   Response validateOTP(OTPDto otpDto);
+	int generateOtp(String mobile);
 
-   void deleteUser(Long userId);
+	Response validateOTP(OTPDto otpDto);
 
-   Response deactivateUser(String mobile);
+	Response verifyOtp(String mobile, String otpCode);
 
-   Response activateUser(String mobile);
+	void deleteUser(Long userId);
+
+	Response deactivateUser(String mobile);
+
+	Response activateUser(String mobile);
 }

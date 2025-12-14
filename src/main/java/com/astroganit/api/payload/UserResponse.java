@@ -7,292 +7,297 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-
 public class UserResponse {
-   private int id;
-   @NotEmpty
-   @NotNull
-   @Size(
-      min = 3,
-      message = "user name must be min of 3 char !!"
-   )
-   private String name;
-   @Email
-   @NotEmpty
-   private String email;
-   @NotNull
-   private String about;
-   private String gender;
-   private String place;
-   private String country;
-   private String state;
-   private String mobile;
-   private String mobilecc;
-   @JsonProperty
-   private String dayBirth;
-   @JsonProperty
-   private String monthBirth;
-   @JsonProperty
-   private String yearBirth;
-   @JsonProperty
-   private String hourBirth;
-   @JsonProperty
-   private String minuteBirth;
-   @JsonProperty
-   private String secondBirth;
-   private String latitude;
-   @JsonProperty
-   private String latDeg;
-   @JsonProperty
-   private String latMin;
-   @JsonProperty
-   private String latNS;
-   @JsonProperty
-   private String longitude;
-   @JsonProperty
-   private String longDeg;
-   @JsonProperty
-   private String longMin;
-   @JsonProperty
-   private String longEW;
-   @JsonProperty
-   private String timeZone;
-   @JsonProperty
-   private boolean userVerified;
-   @JsonProperty
-   private String maritalStatus;
+	private int id;
+	private String loginId;
+	@NotEmpty
+	@NotNull
+	@Size(min = 3, message = "user name must be min of 3 char !!")
+	private String name;
+	@Email
+	@NotEmpty
+	private String email;
+	@NotNull
+	private String about;
+	private String gender;
+	private String place;
+	private String country;
+	private String state;
+	private String mobile;
+	private String mobilecc;
+	@JsonProperty
+	private String dayBirth;
+	@JsonProperty
+	private String monthBirth;
+	@JsonProperty
+	private String yearBirth;
+	@JsonProperty
+	private String hourBirth;
+	@JsonProperty
+	private String minuteBirth;
+	@JsonProperty
+	private String secondBirth;
+	private String latitude;
+	@JsonProperty
+	private String latDeg;
+	@JsonProperty
+	private String latMin;
+	@JsonProperty
+	private String latNS;
+	@JsonProperty
+	private String longitude;
+	@JsonProperty
+	private String longDeg;
+	@JsonProperty
+	private String longMin;
+	@JsonProperty
+	private String longEW;
+	@JsonProperty
+	private String timeZone;
+	@JsonProperty
+	private boolean userVerified;
+	@JsonProperty
+	private String maritalStatus;
 
-   public int getId() {
-      return this.id;
-   }
+	public int getId() {
+		return this.id;
+	}
 
-   @NotNull
-   public String getName() {
-      return this.name;
-   }
+	public String getLoginId() {
+		return loginId;
+	}
 
-   public String getEmail() {
-      return this.email;
-   }
+	public void setLoginId(String loginId) {
+		this.loginId = loginId;
+	}
 
-   @NotNull
-   public String getAbout() {
-      return this.about;
-   }
+	@NotNull
+	public String getName() {
+		return this.name;
+	}
 
-   public String getGender() {
-      return this.gender;
-   }
+	public String getEmail() {
+		return this.email;
+	}
 
-   public String getPlace() {
-      return this.place;
-   }
+	@NotNull
+	public String getAbout() {
+		return this.about;
+	}
 
-   public String getCountry() {
-      return this.country;
-   }
+	public String getGender() {
+		return this.gender;
+	}
 
-   public String getState() {
-      return this.state;
-   }
+	public String getPlace() {
+		return this.place;
+	}
 
-   public String getMobile() {
-      return this.mobile;
-   }
+	public String getCountry() {
+		return this.country;
+	}
 
-   public String getMobilecc() {
-      return this.mobilecc;
-   }
+	public String getState() {
+		return this.state;
+	}
 
-   public String getDayBirth() {
-      return this.dayBirth;
-   }
+	public String getMobile() {
+		return this.mobile;
+	}
 
-   public String getMonthBirth() {
-      return this.monthBirth;
-   }
+	public String getMobilecc() {
+		return this.mobilecc;
+	}
 
-   public String getYearBirth() {
-      return this.yearBirth;
-   }
+	public String getDayBirth() {
+		return this.dayBirth;
+	}
 
-   public String getHourBirth() {
-      return this.hourBirth;
-   }
+	public String getMonthBirth() {
+		return this.monthBirth;
+	}
 
-   public String getMinuteBirth() {
-      return this.minuteBirth;
-   }
+	public String getYearBirth() {
+		return this.yearBirth;
+	}
 
-   public String getSecondBirth() {
-      return this.secondBirth;
-   }
+	public String getHourBirth() {
+		return this.hourBirth;
+	}
 
-   public String getLatitude() {
-      return this.latitude;
-   }
+	public String getMinuteBirth() {
+		return this.minuteBirth;
+	}
 
-   public String getLatDeg() {
-      return this.latDeg;
-   }
+	public String getSecondBirth() {
+		return this.secondBirth;
+	}
 
-   public String getLatMin() {
-      return this.latMin;
-   }
+	public String getLatitude() {
+		return this.latitude;
+	}
 
-   public String getLatNS() {
-      return this.latNS;
-   }
+	public String getLatDeg() {
+		return this.latDeg;
+	}
 
-   public String getLongitude() {
-      return this.longitude;
-   }
+	public String getLatMin() {
+		return this.latMin;
+	}
 
-   public String getLongDeg() {
-      return this.longDeg;
-   }
+	public String getLatNS() {
+		return this.latNS;
+	}
 
-   public String getLongMin() {
-      return this.longMin;
-   }
+	public String getLongitude() {
+		return this.longitude;
+	}
 
-   public String getLongEW() {
-      return this.longEW;
-   }
+	public String getLongDeg() {
+		return this.longDeg;
+	}
 
-   public String getTimeZone() {
-      return this.timeZone;
-   }
+	public String getLongMin() {
+		return this.longMin;
+	}
 
-   public boolean isUserVerified() {
-      return this.userVerified;
-   }
+	public String getLongEW() {
+		return this.longEW;
+	}
 
-   public String getMaritalStatus() {
-      return this.maritalStatus;
-   }
+	public String getTimeZone() {
+		return this.timeZone;
+	}
 
-   public void setId(final int id) {
-      this.id = id;
-   }
+	public boolean isUserVerified() {
+		return this.userVerified;
+	}
 
-   public void setName(@NotNull final String name) {
-      this.name = name;
-   }
+	public String getMaritalStatus() {
+		return this.maritalStatus;
+	}
 
-   public void setEmail(final String email) {
-      this.email = email;
-   }
+	public void setId(final int id) {
+		this.id = id;
+	}
 
-   public void setAbout(@NotNull final String about) {
-      this.about = about;
-   }
+	public void setName(@NotNull final String name) {
+		this.name = name;
+	}
 
-   public void setGender(final String gender) {
-      this.gender = gender;
-   }
+	public void setEmail(final String email) {
+		this.email = email;
+	}
 
-   public void setPlace(final String place) {
-      this.place = place;
-   }
+	public void setAbout(@NotNull final String about) {
+		this.about = about;
+	}
 
-   public void setCountry(final String country) {
-      this.country = country;
-   }
+	public void setGender(final String gender) {
+		this.gender = gender;
+	}
 
-   public void setState(final String state) {
-      this.state = state;
-   }
+	public void setPlace(final String place) {
+		this.place = place;
+	}
 
-   public void setMobile(final String mobile) {
-      this.mobile = mobile;
-   }
+	public void setCountry(final String country) {
+		this.country = country;
+	}
 
-   public void setMobilecc(final String mobilecc) {
-      this.mobilecc = mobilecc;
-   }
+	public void setState(final String state) {
+		this.state = state;
+	}
 
-   @JsonProperty
-   public void setDayBirth(final String dayBirth) {
-      this.dayBirth = dayBirth;
-   }
+	public void setMobile(final String mobile) {
+		this.mobile = mobile;
+	}
 
-   @JsonProperty
-   public void setMonthBirth(final String monthBirth) {
-      this.monthBirth = monthBirth;
-   }
+	public void setMobilecc(final String mobilecc) {
+		this.mobilecc = mobilecc;
+	}
 
-   @JsonProperty
-   public void setYearBirth(final String yearBirth) {
-      this.yearBirth = yearBirth;
-   }
+	@JsonProperty
+	public void setDayBirth(final String dayBirth) {
+		this.dayBirth = dayBirth;
+	}
 
-   @JsonProperty
-   public void setHourBirth(final String hourBirth) {
-      this.hourBirth = hourBirth;
-   }
+	@JsonProperty
+	public void setMonthBirth(final String monthBirth) {
+		this.monthBirth = monthBirth;
+	}
 
-   @JsonProperty
-   public void setMinuteBirth(final String minuteBirth) {
-      this.minuteBirth = minuteBirth;
-   }
+	@JsonProperty
+	public void setYearBirth(final String yearBirth) {
+		this.yearBirth = yearBirth;
+	}
 
-   @JsonProperty
-   public void setSecondBirth(final String secondBirth) {
-      this.secondBirth = secondBirth;
-   }
+	@JsonProperty
+	public void setHourBirth(final String hourBirth) {
+		this.hourBirth = hourBirth;
+	}
 
-   public void setLatitude(final String latitude) {
-      this.latitude = latitude;
-   }
+	@JsonProperty
+	public void setMinuteBirth(final String minuteBirth) {
+		this.minuteBirth = minuteBirth;
+	}
 
-   @JsonProperty
-   public void setLatDeg(final String latDeg) {
-      this.latDeg = latDeg;
-   }
+	@JsonProperty
+	public void setSecondBirth(final String secondBirth) {
+		this.secondBirth = secondBirth;
+	}
 
-   @JsonProperty
-   public void setLatMin(final String latMin) {
-      this.latMin = latMin;
-   }
+	public void setLatitude(final String latitude) {
+		this.latitude = latitude;
+	}
 
-   @JsonProperty
-   public void setLatNS(final String latNS) {
-      this.latNS = latNS;
-   }
+	@JsonProperty
+	public void setLatDeg(final String latDeg) {
+		this.latDeg = latDeg;
+	}
 
-   @JsonProperty
-   public void setLongitude(final String longitude) {
-      this.longitude = longitude;
-   }
+	@JsonProperty
+	public void setLatMin(final String latMin) {
+		this.latMin = latMin;
+	}
 
-   @JsonProperty
-   public void setLongDeg(final String longDeg) {
-      this.longDeg = longDeg;
-   }
+	@JsonProperty
+	public void setLatNS(final String latNS) {
+		this.latNS = latNS;
+	}
 
-   @JsonProperty
-   public void setLongMin(final String longMin) {
-      this.longMin = longMin;
-   }
+	@JsonProperty
+	public void setLongitude(final String longitude) {
+		this.longitude = longitude;
+	}
 
-   @JsonProperty
-   public void setLongEW(final String longEW) {
-      this.longEW = longEW;
-   }
+	@JsonProperty
+	public void setLongDeg(final String longDeg) {
+		this.longDeg = longDeg;
+	}
 
-   @JsonProperty
-   public void setTimeZone(final String timeZone) {
-      this.timeZone = timeZone;
-   }
+	@JsonProperty
+	public void setLongMin(final String longMin) {
+		this.longMin = longMin;
+	}
 
-   @JsonProperty
-   public void setUserVerified(final boolean userVerified) {
-      this.userVerified = userVerified;
-   }
+	@JsonProperty
+	public void setLongEW(final String longEW) {
+		this.longEW = longEW;
+	}
 
-   @JsonProperty
-   public void setMaritalStatus(final String maritalStatus) {
-      this.maritalStatus = maritalStatus;
-   }
+	@JsonProperty
+	public void setTimeZone(final String timeZone) {
+		this.timeZone = timeZone;
+	}
+
+	@JsonProperty
+	public void setUserVerified(final boolean userVerified) {
+		this.userVerified = userVerified;
+	}
+
+	@JsonProperty
+	public void setMaritalStatus(final String maritalStatus) {
+		this.maritalStatus = maritalStatus;
+	}
 }

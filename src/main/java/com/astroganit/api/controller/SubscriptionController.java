@@ -3,6 +3,7 @@ package com.astroganit.api.controller;
 import org.springframework.web.bind.annotation.*;
 
 import com.astroganit.api.entities.UserSubscription;
+import com.astroganit.api.model.VerifyPaymentResponse;
 import com.astroganit.api.serviceImpl.SubscriptionService;
 
 import java.util.Optional;
@@ -18,7 +19,7 @@ public class SubscriptionController {
     }
 
     @PostMapping("/activate")
-    public UserSubscription activate(@RequestBody SubscriptionRequest request) {
+    public VerifyPaymentResponse activate(@RequestBody SubscriptionRequest request) {
         return subscriptionService.activateSubscription(
                 request.getUserId(),
                 request.getPlanId(),
@@ -33,14 +34,14 @@ public class SubscriptionController {
     }
 
     static class SubscriptionRequest {
-        private int userId;
+        private long userId;
         private int planId;
         private int durationDays;
         private String paymentId;
 
         // getters & setters
-        public int getUserId() { return userId; }
-        public void setUserId(int userId) { this.userId = userId; }
+        public long getUserId() { return userId; }
+        public void setUserId(long userId) { this.userId = userId; }
 
         public int getPlanId() { return planId; }
         public void setPlanId(int planId) { this.planId = planId; }

@@ -23,7 +23,7 @@ public class PlanService {
     }
 
     public Optional<Plan> getPlanById(Long id) {
-        return planRepository.findById(id);
+        return planRepository.findByPlanId(id);
     }
 
     public Plan savePlan(Plan plan) {

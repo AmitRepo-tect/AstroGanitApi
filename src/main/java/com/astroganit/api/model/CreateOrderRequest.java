@@ -3,23 +3,23 @@ package com.astroganit.api.model;
 import java.io.Serializable;
 
 public class CreateOrderRequest implements Serializable {
-    private int amount;
-    private String currency; 
-    private int userId;
-    private String paymentFor;
-    private String referenceId;
-   
-    public CreateOrderRequest() {
-      
-    }
+	private double amount;
+	private String currency;
+	private long userId;
+	private String paymentFor;
+	private int referenceId;
+	
+	public CreateOrderRequest() {
 
-    public int getAmount() {
-        return amount;
-    }
+	}
 
-    public void setAmount(int amount) {
-        this.amount = amount;
-    }
+	public double getAmount() {
+		return amount;
+	}
+
+	public void setAmount(double amount) {
+		this.amount = amount;
+	}
 
 	public String getCurrency() {
 		return currency;
@@ -29,11 +29,11 @@ public class CreateOrderRequest implements Serializable {
 		this.currency = currency;
 	}
 
-	public int getUserId() {
+	public long getUserId() {
 		return userId;
 	}
 
-	public void setUserId(int userId) {
+	public void setUserId(long userId) {
 		this.userId = userId;
 	}
 
@@ -45,13 +45,12 @@ public class CreateOrderRequest implements Serializable {
 		this.paymentFor = paymentFor;
 	}
 
-	public String getReferenceId() {
+	public int getReferenceId() {
 		return referenceId;
 	}
 
-	public void setReferenceId(String referenceId) {
+	public void setReferenceId(int referenceId) {
 		this.referenceId = referenceId;
 	}
-	
-    
+
 }

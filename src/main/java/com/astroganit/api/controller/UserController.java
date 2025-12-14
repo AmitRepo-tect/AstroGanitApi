@@ -16,56 +16,57 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping({"/api/user"})
+@RequestMapping({ "/api/user" })
 public class UserController {
-   @Autowired
-   private UserService userService;
+	@Autowired
+	private UserService userService;
 
-   @PostMapping({"/update/profile/{mobile}"})
-   public ResponseEntity<Response> updateUserProfile(@RequestBody UserDto useDto, @PathVariable("mobile") String mobile) {
-      Response updateUserDto = this.userService.updateUserProfile(useDto, mobile);
-      return ResponseEntity.ok(updateUserDto);
-   }
+	@PostMapping({ "/update/profile" })
+	public ResponseEntity<Response> updateUserProfile(@RequestBody UserDto useDto
+			/*,@PathVariable("mobile") String mobile*/) {
+		Response updateUserDto = this.userService.updateUserProfile(useDto);
+		return ResponseEntity.ok(updateUserDto);
+	}
 
-   @PostMapping({"/delete/{userId}"})
-   public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
-      this.userService.deleteUser(userId);
-      return new ResponseEntity(new ApiResponse("user deleted successfully"), HttpStatus.OK);
-   }
+	@PostMapping({ "/delete/{userId}" })
+	public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+		this.userService.deleteUser(userId);
+		return new ResponseEntity(new ApiResponse("user deleted successfully"), HttpStatus.OK);
+	}
 
-   @PostMapping({"/login"})
-   public ResponseEntity<Response> login(@RequestBody UserDto userDto) {
-      Response loginResponse = this.userService.loginUser(userDto);
-      return ResponseEntity.ok(loginResponse);
-   }
+	@PostMapping({ "/login" })
+	public ResponseEntity<Response> login(@RequestBody UserDto userDto) {
+		Response loginResponse = this.userService.loginUser(userDto);
+		return ResponseEntity.ok(loginResponse);
+	}
 
-   @PostMapping({"/update/password"})
-   public ResponseEntity<Response> updatePassword(@RequestBody UserDto useDto) {
-      Response updatePassword = this.userService.updatePassword(useDto);
-      return ResponseEntity.ok(updatePassword);
-   }
+	@PostMapping({ "/update/password" })
+	public ResponseEntity<Response> updatePassword(@RequestBody UserDto useDto) {
+		Response updatePassword = this.userService.updatePassword(useDto);
+		return ResponseEntity.ok(updatePassword);
+	}
 
-   @GetMapping({"/sendotp/{mobile}"})
-   public ResponseEntity<Response> sendOTP(@PathVariable String mobile) {
-      Response response = this.userService.sendOTP(mobile);
-      return ResponseEntity.ok(response);
-   }
+	@GetMapping({ "/sendotp/{mobile}" })
+	public ResponseEntity<Response> sendOTP(@PathVariable String mobile) {
+		Response response = this.userService.sendOTP(mobile);
+		return ResponseEntity.ok(response);
+	}
 
-   @PostMapping({"/validateotp"})
-   public ResponseEntity<Response> validateOTP(@RequestBody OTPDto otpDto) {
-      Response validateOTP = this.userService.validateOTP(otpDto);
-      return ResponseEntity.ok(validateOTP);
-   }
+	@PostMapping({ "/validateotp" })
+	public ResponseEntity<Response> validateOTP(@RequestBody OTPDto otpDto) {
+		Response validateOTP = this.userService.verifyOtp(otpDto.getMobile(), otpDto.getOtp());
+		return ResponseEntity.ok(validateOTP);
+	}
 
-   @PostMapping({"/activateuser/{mobile}"})
-   public ResponseEntity<Response> activateUser(@PathVariable String mobile) {
-      Response activateUser = this.userService.activateUser(mobile);
-      return ResponseEntity.ok(activateUser);
-   }
+	@PostMapping({ "/activateuser/{mobile}" })
+	public ResponseEntity<Response> activateUser(@PathVariable String mobile) {
+		Response activateUser = this.userService.activateUser(mobile);
+		return ResponseEntity.ok(activateUser);
+	}
 
-   @PostMapping({"/deactivateuser/{mobile}"})
-   public ResponseEntity<Response> dectivateUser(@PathVariable String mobile) {
-      Response dectivateUser = this.userService.deactivateUser(mobile);
-      return ResponseEntity.ok(dectivateUser);
-   }
+	@PostMapping({ "/deactivateuser/{mobile}" })
+	public ResponseEntity<Response> dectivateUser(@PathVariable String mobile) {
+		Response dectivateUser = this.userService.deactivateUser(mobile);
+		return ResponseEntity.ok(dectivateUser);
+	}
 }

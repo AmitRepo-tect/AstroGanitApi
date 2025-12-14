@@ -27,6 +27,8 @@ public class User implements UserDetails {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
+	@Column(name = "login_id", length = 50)
+	private String loginId;
 	@Column(name = "user_name", length = 100)
 	private String name;
 	private String email;
@@ -94,6 +96,14 @@ public class User implements UserDetails {
 			return new SimpleGrantedAuthority(role.getName());
 		}).collect(Collectors.toList());
 		return null;
+	}
+
+	public String getLoginId() {
+		return loginId;
+	}
+
+	public void setLoginId(String loginId) {
+		this.loginId = loginId;
 	}
 
 	public String getUsername() {

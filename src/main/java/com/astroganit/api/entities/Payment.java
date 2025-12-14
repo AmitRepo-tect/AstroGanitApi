@@ -16,14 +16,14 @@ public class Payment {
 	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "payment_id", nullable = false, updatable = false)
 	private String paymentId; // Razorpay payment ID
-	private int userId;
-	private int amount;
+	private long userId;
+	private double amount;
 	private String currency;
 	private String status;
 	private String orderId;
 	private String paymentMethod;
 	private String paymentFor; // subscription / product
-	private String referenceId;
+	private int referenceId;
 	private LocalDateTime createdAt = LocalDateTime.now();
 
 	public String getPaymentId() {
@@ -34,19 +34,19 @@ public class Payment {
 		this.paymentId = paymentId;
 	}
 
-	public int getUserId() {
+	public long getUserId() {
 		return userId;
 	}
 
-	public void setUserId(int userId) {
+	public void setUserId(long userId) {
 		this.userId = userId;
 	}
 
-	public int getAmount() {
+	public double getAmount() {
 		return amount;
 	}
 
-	public void setAmount(int amount) {
+	public void setAmount(double amount) {
 		this.amount = amount;
 	}
 
@@ -90,11 +90,11 @@ public class Payment {
 		this.paymentFor = paymentFor;
 	}
 
-	public String getReferenceId() {
+	public int getReferenceId() {
 		return referenceId;
 	}
 
-	public void setReferenceId(String referenceId) {
+	public void setReferenceId(int referenceId) {
 		this.referenceId = referenceId;
 	}
 
