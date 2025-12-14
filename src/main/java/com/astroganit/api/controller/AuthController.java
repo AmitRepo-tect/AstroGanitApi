@@ -1,6 +1,5 @@
 package com.astroganit.api.controller;
 
-import com.astroganit.api.entities.User;
 import com.astroganit.api.exception.UsernamePasswordException;
 import com.astroganit.api.payload.JwtAuthRequest;
 import com.astroganit.api.payload.Response;
@@ -11,7 +10,6 @@ import com.astroganit.api.service.UserService;
 import com.astroganit.lib.panchang.util.AppResultConstant;
 import com.astroganit.security.JwtTokenHelper;
 import java.util.Arrays;
-import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
