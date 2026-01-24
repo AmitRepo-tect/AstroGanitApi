@@ -6,9 +6,11 @@ public class CreateOrderRequest implements Serializable {
 	private double amount;
 	private String currency;
 	private long userId;
+	private String loginId;
+	private int planId;
+	private int durationDays;
 	private String paymentFor;
-	private int referenceId;
-	
+
 	public CreateOrderRequest() {
 
 	}
@@ -45,12 +47,28 @@ public class CreateOrderRequest implements Serializable {
 		this.paymentFor = paymentFor;
 	}
 
-	public int getReferenceId() {
-		return referenceId;
+	public int getPlanId() {
+		return planId;
 	}
 
-	public void setReferenceId(int referenceId) {
-		this.referenceId = referenceId;
+	public void setPlanId(int planId) {
+		this.planId = planId;
+	}
+
+	public int getDurationDays() {
+		return durationDays;
+	}
+
+	public void setDurationDays(int durationDays) {
+		this.durationDays = durationDays;
+	}
+
+	public String getLoginId() {
+		return loginId;
+	}
+
+	public void setLoginId(String loginId) {
+		this.loginId = loginId;
 	}
 
 }

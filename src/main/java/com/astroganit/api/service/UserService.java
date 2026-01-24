@@ -16,6 +16,8 @@ public interface UserService {
 
 	Response loginUser(UserDto userDto);
 
+	Response loginNew(UserDto userDto);
+
 	Response updatePassword(UserDto userDto);
 
 	Response sendOTP(String mobile);

@@ -63,17 +63,16 @@ public class SendSMS {
 			String url = "https://2factor.in/API/V1/" + OTPKEY + "/SMS/" + mobile + "/" + otpValue;
 			System.out.println("" + url);
 
-			/*
-			 * RestTemplate restTemplate = new RestTemplate();
-			 * 
-			 * ResponseEntity<String> response = restTemplate.getForEntity(url,
-			 * String.class); String body = response.getBody(); ObjectMapper objectMapper =
-			 * new ObjectMapper(); OtpResponse otpResponse = objectMapper.readValue(body,
-			 * OtpResponse.class);
-			 * 
-			 * return otpResponse.getStatus();
-			 */
-			return "Success";
+			RestTemplate restTemplate = new RestTemplate();
+
+			ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+			String body = response.getBody();
+			ObjectMapper objectMapper = new ObjectMapper();
+			OtpResponse otpResponse = objectMapper.readValue(body, OtpResponse.class);
+
+			return otpResponse.getStatus();
+
+			// return "Success";
 			/*
 			 * // If template name required: // url = url + "/" + templateName; String json
 			 * = restTemplate.getForObject(url, String.class); System.out.println("" +

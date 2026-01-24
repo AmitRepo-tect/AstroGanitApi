@@ -13,9 +13,12 @@ public class Plan {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int planId;
     private String name;
+    private String nameHi;
+    private String nameEn;
     private String description;
     private Double price;
     private Integer durationDays;
+    private String currency;
     @Column(columnDefinition = "TEXT")
     private String features;
     private Boolean isActive = true;
@@ -30,6 +33,19 @@ public class Plan {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public String getNameHi() {
+		return nameHi;
+	}
+	public void setNameHi(String nameHI) {
+		this.nameHi = nameHI;
+	}
+	public String getNameEn() {
+		return nameEn;
+	}
+	public void setNameEn(String nameEn) {
+		this.nameEn = nameEn;
 	}
 	public String getDescription() {
 		return description;
@@ -61,5 +77,12 @@ public class Plan {
 	public void setIsActive(Boolean isActive) {
 		this.isActive = isActive;
 	}
+	public String getCurrency() {
+		return currency;
+	}
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
+	
     
 }

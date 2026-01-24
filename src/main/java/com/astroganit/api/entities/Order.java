@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
 public class Order {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int orderId;
-    private int userId;
+    private long userId;
     private Double totalAmount;
     private String paymentId;
     private String orderStatus;

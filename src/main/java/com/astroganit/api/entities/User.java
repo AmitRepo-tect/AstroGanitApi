@@ -26,7 +26,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class User implements UserDetails {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private long id;
 	@Column(name = "login_id", length = 50)
 	private String loginId;
 	@Column(name = "user_name", length = 100)
@@ -126,7 +126,7 @@ public class User implements UserDetails {
 		return true;
 	}
 
-	public int getId() {
+	public long getId() {
 		return this.id;
 	}
 
@@ -270,7 +270,7 @@ public class User implements UserDetails {
 		return this.roles;
 	}
 
-	public void setId(final int id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 

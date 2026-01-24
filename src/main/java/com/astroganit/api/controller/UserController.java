@@ -23,7 +23,7 @@ public class UserController {
 
 	@PostMapping({ "/update/profile" })
 	public ResponseEntity<Response> updateUserProfile(@RequestBody UserDto useDto
-			/*,@PathVariable("mobile") String mobile*/) {
+	/* ,@PathVariable("mobile") String mobile */) {
 		Response updateUserDto = this.userService.updateUserProfile(useDto);
 		return ResponseEntity.ok(updateUserDto);
 	}
@@ -37,6 +37,12 @@ public class UserController {
 	@PostMapping({ "/login" })
 	public ResponseEntity<Response> login(@RequestBody UserDto userDto) {
 		Response loginResponse = this.userService.loginUser(userDto);
+		return ResponseEntity.ok(loginResponse);
+	}
+
+	@PostMapping({ "/login_v1" })
+	public ResponseEntity<Response> loginNew(@RequestBody UserDto userDto) {
+		Response loginResponse = this.userService.loginNew(userDto);
 		return ResponseEntity.ok(loginResponse);
 	}
 

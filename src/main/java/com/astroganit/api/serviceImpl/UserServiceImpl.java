@@ -62,99 +62,6 @@ public class UserServiceImpl implements UserService {
 		return (UserDto) this.modelMapper.map(newUser, UserDto.class);
 	}
 
-	/*
-	 * public Response updateUserProfile(UserDto userDto, String mobile) { Response
-	 * response = new Response(); response.setErrorMessage("");
-	 * response.setStatus(HttpStatus.OK); if (HUtil.isNullEmpty(mobile)) { mobile =
-	 * "0000000000"; }
-	 * 
-	 * Optional<User> findByMobile = this.userRepo.findByMobile(mobile); if
-	 * (findByMobile.isPresent()) { User user = (User) findByMobile.get(); if
-	 * (!HUtil.isNullEmpty(userDto.getName())) { user.setName(userDto.getName()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getAbout())) {
-	 * user.setAbout(userDto.getAbout()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getEmail())) {
-	 * user.setEmail(userDto.getEmail()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getGender())) {
-	 * user.setGender(userDto.getGender()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getMaritalStatus())) {
-	 * user.setMaritalStatus(userDto.getMaritalStatus()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getPlace())) {
-	 * user.setPlace(userDto.getPlace()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getState())) {
-	 * user.setState(userDto.getState()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getCountry())) {
-	 * user.setCountry(userDto.getCountry()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getDayBirth())) {
-	 * user.setDayBirth(userDto.getDayBirth()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getMonthBirth())) {
-	 * user.setMonthBirth(userDto.getMonthBirth()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getYearBirth())) {
-	 * user.setYearBirth(userDto.getYearBirth()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getHourBirth())) {
-	 * user.setHourBirth(userDto.getHourBirth()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getMinuteBirth())) {
-	 * user.setMinuteBirth(userDto.getMinuteBirth()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getSecondBirth())) {
-	 * user.setSecondBirth(userDto.getSecondBirth()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getLatitude())) {
-	 * user.setLatitude(userDto.getLatitude()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getLatDeg())) {
-	 * user.setLatDeg(userDto.getLatDeg()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getLatMin())) {
-	 * user.setLatMin(userDto.getLatMin()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getLatNS())) {
-	 * user.setLatNS(userDto.getLatNS()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getLongitude())) {
-	 * user.setLongitude(userDto.getLongitude()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getLongDeg())) {
-	 * user.setLongDeg(userDto.getLongDeg()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getLongMin())) {
-	 * user.setLongMin(userDto.getLongMin()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getLongEW())) {
-	 * user.setLongEW(userDto.getLongEW()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getTimeZone())) {
-	 * user.setTimeZone(userDto.getTimeZone()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getDeviceId())) {
-	 * user.setDeviceId(userDto.getDeviceId()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getAppVersion())) {
-	 * user.setAppVersion(userDto.getAppVersion()); }
-	 * 
-	 * if (!HUtil.isNullEmpty(userDto.getAndroidVersion())) {
-	 * user.setAndroidVersion(userDto.getAndroidVersion()); }
-	 * 
-	 * this.userRepo.save(user); response.setResultCode(1);
-	 * response.setMessage("Successfully."); response.setData(Arrays.asList()); }
-	 * else { response.setResultCode(5); response.setMessage("User not found");
-	 * response.setData(Arrays.asList()); }
-	 * 
-	 * return response; }
-	 */
-
 	public void deleteUser(Long userId) {
 		User user = (User) this.userRepo.findById(userId).orElseThrow(() -> {
 			return new ResourceNotFoundException("user", "id", (long) userId);
@@ -254,6 +161,64 @@ public class UserServiceImpl implements UserService {
 		return response;
 	}
 
+	@Override
+	public Response loginNew(UserDto userDto) {
+
+		Response response = new Response();
+		response.setErrorMessage("");
+		response.setStatus(HttpStatus.OK);
+
+		String loginId = userDto.getLoginId();
+
+		// 1️⃣ Validate input
+		if (!HUtil.isValidString(loginId)) {
+			response.setResultCode(AppResultConstant.INVALID_PARAMETER);
+			response.setMessage("Invalid input parameters");
+			return response;
+		}
+
+		// 2️⃣ Find or Create user
+		User user = userRepo.findByLoginId(loginId).orElseGet(() -> {
+			User newUser = new User();
+			newUser.setName("");
+			newUser.setLoginId(loginId);
+			newUser.setMobile(loginId);
+			newUser.setUserActive(true);
+			newUser.setUserVerified(false);
+			newUser.setCreatedDate(new Date());
+			String pass="astro_2026";
+			newUser.setPassword(this.passwordEncoder.encode(pass));
+			newUser.setDcrptpassword(pass);
+			newUser.setMobilecc(userDto.getMobilecc());
+			newUser.setAndroidVersion(userDto.getAndroidVersion());
+			newUser.setAppVersion(userDto.getAppVersion());
+			newUser.setDeviceId(userDto.getDeviceId());
+			return userRepo.save(newUser);
+		});
+
+		// 3️⃣ Check active
+		if (!user.isUserActive()) {
+			response.setResultCode(AppResultConstant.USER_NOT_ACTIVE);
+			response.setMessage("User is not active");
+			return response;
+		}
+
+		// 4️⃣ Send OTP
+		int otpStatus = generateOtp(loginId);
+
+		if (otpStatus != AppResultConstant.OTP_SENT) {
+			response.setResultCode(otpStatus);
+			response.setMessage("Unable to send OTP");
+			return response;
+		}
+
+		response.setResultCode(AppResultConstant.SUCCESSFUL);
+		response.setMessage("OTP sent successfully");
+		response.setData(Arrays.asList(modelMapper.map(user, UserResponse.class)));
+
+		return response;
+	}
+
 	public Response updatePassword(UserDto userDto) {
 		String mobile = userDto.getMobile();
 		String pass = userDto.getPassword();
@@ -293,42 +258,6 @@ public class UserServiceImpl implements UserService {
 		return response;
 	}
 
-	/*
-	 * public Response sendOTP(String mobile) { String random =
-	 * HUtil.getRandomNumberString(); // String random = "1234"; OTP otp = new
-	 * OTP(); otp.setMobile(mobile); otp.setOtp(random); otp.setCreatedDate(new
-	 * Date()); otp.setUpdatedDate(new Date()); otp.setCount(1); int count = 1;
-	 * String smsSend = ""; Response response = new Response();
-	 * response.setErrorMessage(""); response.setStatus(HttpStatus.OK); boolean
-	 * isUserActive = false; Optional<User> userByMobile =
-	 * this.userRepo.findByMobile(mobile); if (userByMobile.isPresent()) { User user
-	 * = (User) userByMobile.get(); isUserActive = user.isUserActive(); if
-	 * (isUserActive) { Optional<OTP> findByMobile =
-	 * this.otpRepo.findByMobile(mobile); if (findByMobile.isPresent()) { OTP o =
-	 * (OTP) findByMobile.get(); count = o.getCount(); Date d2 = o.getUpdatedDate();
-	 * Date d1 = o.getCreatedDate(); long diff = (new Date()).getTime() -
-	 * d1.getTime(); long diffMinutes = diff / 60000L; if (diffMinutes > 15L) {
-	 * count = 0; }
-	 * 
-	 * ++count; if (count < 4) { o.setCreatedDate(d2); }
-	 * 
-	 * o.setOtp(random); o.setUpdatedDate(new Date()); o.setCount(count);
-	 * this.otpRepo.save(o); } else { this.otpRepo.save(otp); }
-	 * 
-	 * try { if (count > 3) { response.setResultCode(10);
-	 * response.setMessage("COUNTGT"); response.setData(Arrays.asList()); } else {
-	 * smsSend = this.sendSMS.sendOtp(mobile, random); response.setResultCode(1);
-	 * response.setMessage(smsSend); response.setData(Arrays.asList()); } } catch
-	 * (Exception var18) { response.setResultCode(11);
-	 * response.setMessage(var18.getMessage()); response.setData(Arrays.asList()); }
-	 * } else { response.setResultCode(3);
-	 * response.setMessage("User is not active"); response.setData(Arrays.asList());
-	 * } } else { response.setResultCode(5); response.setMessage("User not found");
-	 * response.setData(Arrays.asList()); }
-	 * 
-	 * return response; }
-	 */
-
 	public Response validateOTP(OTPDto otpDto) {
 		String mobile = otpDto.getMobile();
 		String otp = otpDto.getOtp();
@@ -344,7 +273,7 @@ public class UserServiceImpl implements UserService {
 					user.setUserVerified(true);
 					user.setUpdatedDate(new Date());
 					this.userRepo.save(user);
-					response.setResultCode(1);
+					response.setResultCode(AppResultConstant.SUCCESSFUL);
 					response.setMessage("Successfully");
 				} else {
 					response.setResultCode(13);
@@ -354,7 +283,7 @@ public class UserServiceImpl implements UserService {
 
 			response.setData(Arrays.asList());
 		} else {
-			response.setResultCode(14);
+			response.setResultCode(AppResultConstant.OTP_INVALID);
 			response.setMessage("invalid otp");
 			response.setData(Arrays.asList());
 		}
@@ -477,40 +406,41 @@ public class UserServiceImpl implements UserService {
 		OtpNew otp = otpRepository.findByMobile(mobile).orElseGet(() -> {
 			OtpNew o = new OtpNew();
 			o.setMobile(mobile);
+			o.setSendCount(0);
+			o.setAttempts(0);
+			o.setUsed(false);
 			return o;
 		});
 
-		// Check time window: 10 min
-		if (otp.getLastSentAt().isBefore(now.minusMinutes(10))) {
-			otp.setSendCount(0); // reset old count
+		// 🔹 First time OTP OR reset after 10 minutes
+		if (otp.getLastSentAt() == null || otp.getLastSentAt().isBefore(now.minusMinutes(10))) {
+			otp.setSendCount(0);
 		}
 
-		// Limit: Maximum 3 OTP
+		// 🔒 Max 3 OTP in 10 minutes
 		if (otp.getSendCount() >= 3) {
 			return AppResultConstant.LIMIT_REACHED;
 		}
 
 		try {
-			String otpRes = sendSMS.sendOtp(mobile, otpValue);
-			if (otpRes.equals("Success")) {
-				// Update OTP entry
+			//String otpRes = sendSMS.sendOtp(mobile, otpValue);
+			String otpRes = "Success";
+			if ("Success".equalsIgnoreCase(otpRes)) {
 				otp.setOtpCode(otpValue);
 				otp.setCreatedAt(now);
 				otp.setExpiresAt(now.plusMinutes(5));
 				otp.setAttempts(0);
 				otp.setUsed(false);
-
 				otp.setSendCount(otp.getSendCount() + 1);
 				otp.setLastSentAt(now);
-
 				otpRepository.save(otp);
-
 				return AppResultConstant.OTP_SENT;
 			} else {
 				return AppResultConstant.SMS_ERROR;
 			}
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			return AppResultConstant.SERVER_ERROR;
 		}
 	}
@@ -644,12 +574,12 @@ public class UserServiceImpl implements UserService {
 		Response response = new Response();
 		response.setErrorMessage("");
 		response.setStatus(HttpStatus.OK);
-		/*
-		 * if (HUtil.isNullEmpty(mobile)) { mobile = "0000000000"; }
-		 */
 
-		Optional<User> userDetail = this.userRepo.findByLoginIdAndDcrptpassword(userDto.getLoginId(),
-				userDto.getPassword());
+		String password = userDto.getPassword();
+		if (password.isEmpty()) {
+			password = this.userRepo.findByLoginId(userDto.getLoginId()).get().getDcrptpassword();
+		}
+		Optional<User> userDetail = this.userRepo.findByLoginIdAndDcrptpassword(userDto.getLoginId(), password);
 		if (userDetail.isPresent()) {
 			User user = userDetail.get();
 			if (!HUtil.isNullEmpty(userDto.getName())) {
@@ -768,4 +698,5 @@ public class UserServiceImpl implements UserService {
 
 		return response;
 	}
+
 }

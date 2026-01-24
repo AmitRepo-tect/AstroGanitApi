@@ -14,4 +14,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
 	Optional<Payment> findByOrderId(String orderId); // Razorpay order ID
 
 	List<Payment> findByUserId(Long userId);
+
+	Optional<Payment> findByReferenceId(String referenceId);
+
 }

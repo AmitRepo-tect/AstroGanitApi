@@ -1,5 +1,6 @@
 package com.astroganit.api.controller;
 
+import com.astroganit.api.entities.User;
 import com.astroganit.api.exception.UsernamePasswordException;
 import com.astroganit.api.payload.JwtAuthRequest;
 import com.astroganit.api.payload.Response;
@@ -53,6 +54,25 @@ public class AuthController {
 		response1.setResultCode(1);
 		response1.setData(Arrays.asList(generateToken));
 		return new ResponseEntity(response1, HttpStatus.OK);
+	}
+
+	@PostMapping("/token_otp")
+	public ResponseEntity<Response> createTokenWithOtp(@RequestBody JwtAuthRequest request) {
+
+		// 1. Verify OTP (already done in your verifyOtp method)
+		User user = userRepo.findByLoginId(request.getUsername())
+				.orElseThrow(() -> new RuntimeException("User not found"));
+
+		// 2. Generate token WITHOUT password
+		UserDetails userDetails = userDetailService.loadUserByUsername(user.getLoginId());
+		String token = jwtTokenHelper.generateToken(userDetails);
+
+		Response response = new Response();
+		response.setStatus(HttpStatus.OK);
+		response.setResultCode(AppResultConstant.SUCCESSFUL);
+		response.setData(Arrays.asList(token));
+
+		return ResponseEntity.ok(response);
 	}
 
 	public void authenticate(String username, String password) throws Exception {

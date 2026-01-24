@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 
 
-public class VerifyPaymentResponse {
+public class SubscriptionDetail {
 	private Long subscriptionId;
 	private long userId;
 	private int planId;

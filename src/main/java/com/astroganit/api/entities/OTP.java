@@ -12,9 +12,11 @@ import jakarta.persistence.Entity;
 @Entity
 @Table(name = "otp")
 public class OTP {
+	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private long id;
 	private String mobile;
 	private String otp;
 	@Column(name = "created_date")
@@ -23,7 +25,7 @@ public class OTP {
 	private Date updatedDate;
 	private int count;
 
-	public int getId() {
+	public long getId() {
 		return this.id;
 	}
 
@@ -47,7 +49,7 @@ public class OTP {
 		return this.count;
 	}
 
-	public void setId(final int id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 
