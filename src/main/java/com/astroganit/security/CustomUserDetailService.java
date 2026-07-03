@@ -11,13 +11,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CustomUserDetailService implements UserDetailsService {
-   @Autowired
-   private UserRepo userRepo;
+	@Autowired
+	private UserRepo userRepo;
 
-   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-      User user = (User)this.userRepo.findByMobile(username).orElseThrow(() -> {
-         return new ResourceNotFoundException("user", "mobile: " + username, 0L);
-      });
-      return user;
-   }
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		User user = (User) this.userRepo.findByMobile(username).orElseThrow(() -> {
+			return new ResourceNotFoundException("User not found");
+		});
+		return user;
+	}
 }

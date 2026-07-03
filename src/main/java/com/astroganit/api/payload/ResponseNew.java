@@ -7,6 +7,7 @@ public class ResponseNew<T> {
 	private int resultCode;
 	private String errorMessage;
 	private HttpStatus status;
+	private int statusCode;
 	private T data;
 
 	public ResponseNew() {
@@ -42,6 +43,14 @@ public class ResponseNew<T> {
 
 	public void setStatus(HttpStatus status) {
 		this.status = status;
+	}
+
+	public int getStatusCode() {
+		return statusCode;
+	}
+
+	public void setStatusCode(int statusCode) {
+		this.statusCode = statusCode;
 	}
 
 	public T getData() {

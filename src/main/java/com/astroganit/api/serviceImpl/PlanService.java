@@ -21,6 +21,9 @@ public class PlanService {
     public List<Plan> getAllPlans() {
         return planRepository.findAll();
     }
+    public List<Plan> getAllActivePlans() {
+        return planRepository.findActivePlansWithFeatures();
+    }
 
     public Optional<Plan> getPlanById(Long id) {
         return planRepository.findByPlanId(id);

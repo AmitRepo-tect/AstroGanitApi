@@ -18,7 +18,7 @@ public class OtpNew {
 	@Column(nullable = false, length = 15)
 	private String mobile;
 
-	@Column(nullable = false, length = 6)
+	@Column(nullable = false, length = 100)
 	private String otpCode;
 
 	@Column(nullable = false)
@@ -35,8 +35,8 @@ public class OtpNew {
 	@Column(nullable = false)
 	private int sendCount = 0;
 
-	@Column(nullable = false)
-	private LocalDateTime lastSentAt = LocalDateTime.now();
+	@Column
+	private LocalDateTime lastSentAt;
 
 	public void setMobile(String mobile) {
 		this.mobile = mobile;
@@ -109,6 +109,5 @@ public class OtpNew {
 	public void setLastSentAt(LocalDateTime lastSentAt) {
 		this.lastSentAt = lastSentAt;
 	}
-	
 
 }

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.astroganit.api.exception.AppException;
 import com.astroganit.api.model.OtpResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -55,39 +56,39 @@ public class SendSMS {
 		}
 	}
 
-	public String sendOtp(String mobile, String otpValue) {
+	/*
+	 * public String sendOtp(String mobile, String otpValue) { try {
+	 * 
+	 * String apiKey = "your_api_key"; String templateName = "template_name"; // if
+	 * required String url = "https://2factor.in/API/V1/" + OTPKEY + "/SMS/" +
+	 * mobile + "/" + otpValue; RestTemplate restTemplate = new RestTemplate();
+	 * 
+	 * ResponseEntity<String> response = restTemplate.getForEntity(url,
+	 * String.class); String body = response.getBody(); ObjectMapper objectMapper =
+	 * new ObjectMapper(); OtpResponse otpResponse = objectMapper.readValue(body,
+	 * OtpResponse.class);
+	 * 
+	 * return otpResponse.getStatus();
+	 * 
+	 * } catch (Exception e) { return "Exception"; }
+	 * 
+	 * }
+	 */
+
+	public void sendOtp(String mobile, String otpValue) {
 		try {
-
-			String apiKey = "your_api_key";
-			String templateName = "template_name"; // if required
 			String url = "https://2factor.in/API/V1/" + OTPKEY + "/SMS/" + mobile + "/" + otpValue;
-			System.out.println("" + url);
-
-			RestTemplate restTemplate = new RestTemplate();
-
 			ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-			String body = response.getBody();
+
 			ObjectMapper objectMapper = new ObjectMapper();
-			OtpResponse otpResponse = objectMapper.readValue(body, OtpResponse.class);
+			OtpResponse otpResponse = objectMapper.readValue(response.getBody(), OtpResponse.class);
 
-			return otpResponse.getStatus();
+			if (!"Success".equalsIgnoreCase(otpResponse.getStatus())) {
+				throw new AppException(ResultCode.SMS_ERROR);
+			}
 
-			// return "Success";
-			/*
-			 * // If template name required: // url = url + "/" + templateName; String json
-			 * = restTemplate.getForObject(url, String.class); System.out.println("" +
-			 * json);
-			 * 
-			 * ObjectMapper mapper = new ObjectMapper(); OtpResponse otpResponse = null; try
-			 * { otpResponse = mapper.readValue(json, OtpResponse.class); } catch (Exception
-			 * e) { // TODO Auto-generated catch block e.printStackTrace(); }
-			 * 
-			 * OtpResponse otpResponse = restTemplate.getForObject(url, OtpResponse.class);
-			 * return otpResponse.getStatus();
-			 */
 		} catch (Exception e) {
-			return "Exception";
+			throw new AppException(ResultCode.SMS_ERROR);
 		}
-
 	}
 }

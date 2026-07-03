@@ -31,10 +31,17 @@ public class DailyHoroscopeController {
 	@GetMapping({ "/dailyhoroscope/{day}/{langCode}" })
 	public ResponseEntity<List<DailyHoroscopeAspect>> getDailyRashifal(@PathVariable("day") String day,
 			@PathVariable("langCode") String langCode) {
+		System.out.println("First");
 		LocalDate myDateObj = LocalDate.now().plusDays((long) Integer.parseInt(day));
 		DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("ddMMyyyy");
 		String formattedDate = myDateObj.format(myFormatObj);
-		List<DailyHoroscopeAspect> dh = this.dailyService.getHoroscopeByDay(formattedDate, langCode);
+		System.out.println("First");
+		List<DailyHoroscopeAspect> dh=null ;
+		try {
+			dh = this.dailyService.getHoroscopeByDay(formattedDate, langCode);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		return dh == null ? ResponseEntity.status(HttpStatus.NOT_FOUND).build()
 				: ResponseEntity.status(HttpStatus.OK).body(dh);
 	}

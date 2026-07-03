@@ -1,16 +1,21 @@
 package com.astroganit.api.controller;
 
 import com.astroganit.api.entities.User;
+import com.astroganit.api.exception.AppException;
 import com.astroganit.api.exception.UsernamePasswordException;
 import com.astroganit.api.payload.JwtAuthRequest;
 import com.astroganit.api.payload.Response;
+import com.astroganit.api.payload.ResponseNew;
 import com.astroganit.api.payload.UserDto;
 import com.astroganit.api.payload.UserResponse;
 import com.astroganit.api.repository.UserRepo;
 import com.astroganit.api.service.UserService;
+import com.astroganit.api.util.ResultCode;
 import com.astroganit.lib.panchang.util.AppResultConstant;
 import com.astroganit.security.JwtTokenHelper;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,52 +53,60 @@ public class AuthController {
 		this.authenticate(request.getUsername(), request.getPassword());
 		UserDetails userDetails = this.userDetailService.loadUserByUsername(request.getUsername());
 		String generateToken = this.jwtTokenHelper.generateToken(userDetails);
-		Response response1 = new Response();
-		response1.setErrorMessage("");
-		response1.setStatus(HttpStatus.OK);
-		response1.setResultCode(1);
-		response1.setData(Arrays.asList(generateToken));
-		return new ResponseEntity(response1, HttpStatus.OK);
+		Response response = new Response();
+		response.setErrorMessage("");
+		response.setStatus(HttpStatus.OK);
+		response.setResultCode(AppResultConstant.SUCCESSFUL);
+		response.setData(Arrays.asList(generateToken));
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	@PostMapping("/token_otp")
-	public ResponseEntity<Response> createTokenWithOtp(@RequestBody JwtAuthRequest request) {
+	public ResponseEntity<ResponseNew<List<String>>> createTokenWithOtp(@RequestBody JwtAuthRequest request) {
 
 		// 1. Verify OTP (already done in your verifyOtp method)
 		User user = userRepo.findByLoginId(request.getUsername())
-				.orElseThrow(() -> new RuntimeException("User not found"));
+				.orElseThrow(() -> new AppException(ResultCode.USER_NOT_FOUND));
 
 		// 2. Generate token WITHOUT password
 		UserDetails userDetails = userDetailService.loadUserByUsername(user.getLoginId());
 		String token = jwtTokenHelper.generateToken(userDetails);
 
-		Response response = new Response();
+		ResponseNew<List<String>> response = new ResponseNew<List<String>>();
 		response.setStatus(HttpStatus.OK);
-		response.setResultCode(AppResultConstant.SUCCESSFUL);
+		response.setResultCode(ResultCode.SUCCESS.getCode());
+		response.setMessage(ResultCode.SUCCESS.getMessage());
 		response.setData(Arrays.asList(token));
-
 		return ResponseEntity.ok(response);
 	}
 
-	public void authenticate(String username, String password) throws Exception {
+	@PostMapping("/generate-token")
+	public ResponseEntity<Response> generateToken(@RequestBody JwtAuthRequest request) {
 
-		if (username == null || password == null) {
-			throw new UsernamePasswordException(username, password, "Username or Password Missing");
+		// 1. Verify OTP (already done in your verifyOtp method)
+		User user = userRepo.findByLoginId(request.getUsername())
+				.orElseThrow(() -> new AppException(ResultCode.USER_NOT_FOUND));
+		if (!user.isUserVerified()) {
+			throw new AppException(ResultCode.USER_NOT_VERIFIED);
 		}
-
-		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password);
-
+		// 2. Generate token WITHOUT password
+		String token;
 		try {
-			authenticationManger.authenticate(authToken);
-		} catch (DisabledException e) {
-			throw new UsernamePasswordException(username, password, "USER_DISABLED");
-		} catch (BadCredentialsException e) {
-			throw new UsernamePasswordException(username, password, "Bad Credentials");
+			UserDetails userDetails = userDetailService.loadUserByUsername(user.getLoginId());
+			token = jwtTokenHelper.generateToken(userDetails);
+		} catch (Exception e) {
+			throw new AppException(ResultCode.SERVER_ERROR);
 		}
+		Response response = new Response();
+		response.setStatus(HttpStatus.OK);
+		response.setResultCode(ResultCode.SUCCESS.getCode());
+		response.setMessage(ResultCode.SUCCESS.getMessage());
+		response.setData(Arrays.asList(token));
+		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping({ "/register" })
-	public Response registeredNewUser(@RequestBody UserDto userDto) {
+	public ResponseEntity<Response> registeredNewUser(@RequestBody UserDto userDto) {
 		userDto.setDcrptpassword(userDto.getPassword());
 		if (userDto.getName() == null) {
 			userDto.setName("");
@@ -103,32 +116,37 @@ public class AuthController {
 		Response response = new Response();
 		response.setErrorMessage("");
 		response.setStatus(HttpStatus.OK);
-		boolean isUserExit = this.userService.checkMobileNumberExit(loginID);
-		if (!isUserExit) {
+		boolean isUserExist = this.userService.checkMobileNumberExit(loginID);
+		if (!isUserExist) {
 			userDto = this.userService.registerNewUser(userDto);
-			String otpResponse = "";
-			int resultCode = this.userService.generateOtp(mobileNo);
-			if (resultCode == AppResultConstant.LIMIT_REACHED) {
-				otpResponse = "OTP request limit reached. Try again after 10 minutes.";
-			} else if (resultCode == AppResultConstant.SERVER_ERROR) {
-				otpResponse = "Server Error";
-			} else if (resultCode == AppResultConstant.SMS_ERROR) {
-				otpResponse = "SMS sending failed";
-			} else {
-				otpResponse = "OTP sent successfully";
-			}
-
+			this.userService.generateOtp(mobileNo);
 			UserResponse logedInUser = (UserResponse) this.modelMapper.map(userDto, UserResponse.class);
-			response.setResultCode(resultCode);
-			response.setMessage(otpResponse);
+			response.setResultCode(ResultCode.OTP_SENT.getCode());
+			response.setMessage(ResultCode.OTP_SENT.getMessage());
 			response.setData(Arrays.asList(logedInUser));
 
 		} else {
-			response.setResultCode(AppResultConstant.USER_ALREADY_REGISTER);
-			response.setMessage("User Registered already");
-			response.setData(Arrays.asList());
+			response.setResultCode(ResultCode.USER_ALREADY_REGISTER.getCode());
+			response.setMessage(ResultCode.USER_ALREADY_REGISTER.getMessage());
+			response.setData(Collections.emptyList());
+		}
+		return ResponseEntity.ok(response);
+	}
+
+	public void authenticate(String username, String password) throws Exception {
+
+		if (username == null || password == null) {
+			throw new UsernamePasswordException("Username or Password Missing");
 		}
 
-		return response;
+		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password);
+
+		try {
+			authenticationManger.authenticate(authToken);
+		} catch (DisabledException e) {
+			throw new UsernamePasswordException("User is Disabled");
+		} catch (BadCredentialsException e) {
+			throw new UsernamePasswordException("Bad Credentials");
+		}
 	}
 }

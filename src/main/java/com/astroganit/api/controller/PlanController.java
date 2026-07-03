@@ -12,19 +12,24 @@ import java.util.Optional;
 @RequestMapping("/api/plans")
 public class PlanController {
 
-    private final PlanService planService;
+	private final PlanService planService;
 
-    public PlanController(PlanService planService) {
-        this.planService = planService;
-    }
+	public PlanController(PlanService planService) {
+		this.planService = planService;
+	}
 
-    @GetMapping
-    public List<Plan> getAllPlans() {
-        return planService.getAllPlans();
-    }
+	@GetMapping
+	public List<Plan> getAllPlans() {
+		return planService.getAllPlans();
+	}
 
-    @GetMapping("/{id}")
-    public Optional<Plan> getPlanById(@PathVariable Long id) {
-        return planService.getPlanById(id);
-    }
+	@GetMapping("/active")
+	public List<Plan> getAllActivePlans() {
+		return planService.getAllActivePlans();
+	}
+
+	@GetMapping("/{id}")
+	public Optional<Plan> getPlanById(@PathVariable Long id) {
+		return planService.getPlanById(id);
+	}
 }
