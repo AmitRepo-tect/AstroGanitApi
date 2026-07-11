@@ -111,7 +111,10 @@ public class UserServiceImpl implements UserService {
 		}
 
 		// 4️⃣ Generate OTP
-		generateOtp(loginId);
+		//generateOtp(loginId);
+		if (!"9999999999".equals(loginId)) {
+		    generateOtp(loginId);
+		}
 		// 5️⃣ Prepare response
 		response.setStatus(HttpStatus.OK);
 		response.setStatusCode(HttpStatus.OK.value());
@@ -153,7 +156,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		// 📩 Send OTP via SMS
-		sendSMS.sendOtp(mobile, otpValue);
+		//sendSMS.sendOtp(mobile, otpValue);
 		// 🔐 Hash and store OTP
 		otp.setOtpCode(passwordEncoder.encode(otpValue));
 		otp.setCreatedAt(now);
@@ -216,7 +219,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Transactional
-	public ResponseNew<List<String>> verifyOtp(String mobile, String otpCode) {
+	public ResponseNew<List<String>> verifyOtpOld(String mobile, String otpCode) {
 
 		ResponseNew<List<String>> response = new ResponseNew<List<String>>();
 		response.setStatus(HttpStatus.OK);
@@ -269,6 +272,77 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return response;
+	}
+	
+	@Transactional
+	public ResponseNew<List<String>> verifyOtp(String mobile, String otpCode) {
+
+		// Play Store review account
+		if ("9999999999".equals(mobile) && "4055".equals(otpCode)) {
+
+			//User user = userRepo.findByLoginId(mobile).orElseThrow(() -> new AppException(ResultCode.USER_NOT_FOUND));
+
+			return loginUser(mobile);
+		}
+
+		OtpNew latestOtp = otpRepository.findByMobile(mobile)
+				.orElseThrow(() -> new AppException(ResultCode.OTP_NOT_FOUND));
+
+		// Already used
+		if (latestOtp.isUsed()) {
+			throw new AppException(ResultCode.OTP_ALREADY_USED);
+		}
+
+		// Expired
+		if (LocalDateTime.now().isAfter(latestOtp.getExpiresAt())) {
+			throw new AppException(ResultCode.OTP_EXPIRED);
+		}
+
+		// Max attempts
+		if (latestOtp.getAttempts() >= 3) {
+			throw new AppException(ResultCode.MAX_ATTEMPTS_REACHED);
+		}
+
+		// Increment attempts
+		latestOtp.setAttempts(latestOtp.getAttempts() + 1);
+
+		// OTP validation
+		if (!passwordEncoder.matches(otpCode, latestOtp.getOtpCode())) {
+			otpRepository.save(latestOtp);
+			throw new AppException(ResultCode.OTP_INVALID);
+		}
+
+		// Mark OTP as used
+		latestOtp.setUsed(true);
+		otpRepository.save(latestOtp);
+
+		// Find user
+		//User user = userRepo.findByLoginId(mobile).orElseThrow(() -> new AppException(ResultCode.USER_NOT_FOUND));
+
+		return loginUser(mobile);
+	}
+
+	private ResponseNew<List<String>> loginUser(String mobile) {
+
+	    ResponseNew<List<String>> response = new ResponseNew<>();
+	    response.setStatus(HttpStatus.OK);
+
+	    User user = userRepo.findByLoginId(mobile)
+	            .orElseThrow(() -> new AppException(ResultCode.USER_NOT_FOUND));
+
+	    user.setUserVerified(true);
+	    userRepo.save(user);
+
+	    String token = generateToken(mobile);
+
+	    response.setMessage("OTP verified successfully");
+	    response.setResultCode(ResultCode.SUCCESS.getCode());
+
+	    if (token != null) {
+	        response.setData(Collections.singletonList(token));
+	    }
+
+	    return response;
 	}
 
 	String generateToken(String mobile) {

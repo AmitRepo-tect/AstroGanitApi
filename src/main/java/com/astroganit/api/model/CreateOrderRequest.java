@@ -1,50 +1,24 @@
 package com.astroganit.api.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class CreateOrderRequest implements Serializable {
-	private double amount;
-	private String currency;
-	private long userId;
-	private String loginId;
+	
+	private BigDecimal amount;
 	private int planId;
-	private int durationDays;
 	private String paymentFor;
 
 	public CreateOrderRequest() {
 
 	}
 
-	public double getAmount() {
+	public BigDecimal getAmount() {
 		return amount;
 	}
 
-	public void setAmount(double amount) {
+	public void setAmount(BigDecimal amount) {
 		this.amount = amount;
-	}
-
-	public String getCurrency() {
-		return currency;
-	}
-
-	public void setCurrency(String currency) {
-		this.currency = currency;
-	}
-
-	public long getUserId() {
-		return userId;
-	}
-
-	public void setUserId(long userId) {
-		this.userId = userId;
-	}
-
-	public String getPaymentFor() {
-		return paymentFor;
-	}
-
-	public void setPaymentFor(String paymentFor) {
-		this.paymentFor = paymentFor;
 	}
 
 	public int getPlanId() {
@@ -55,20 +29,12 @@ public class CreateOrderRequest implements Serializable {
 		this.planId = planId;
 	}
 
-	public int getDurationDays() {
-		return durationDays;
+	public String getPaymentFor() {
+		return paymentFor;
 	}
 
-	public void setDurationDays(int durationDays) {
-		this.durationDays = durationDays;
-	}
-
-	public String getLoginId() {
-		return loginId;
-	}
-
-	public void setLoginId(String loginId) {
-		this.loginId = loginId;
+	public void setPaymentFor(String paymentFor) {
+		this.paymentFor = paymentFor;
 	}
 
 }

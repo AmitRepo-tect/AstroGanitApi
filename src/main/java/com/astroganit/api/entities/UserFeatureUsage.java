@@ -1,109 +1,106 @@
 package com.astroganit.api.entities;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "user_feature_usage")
 public class UserFeatureUsage {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(name = "user_id", nullable = false)
-	private Long userId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-	@Column(name = "subscription_id", nullable = false)
-	private Long subscriptionId;
+    @Column(name = "subscription_id", nullable = false)
+    private Long subscriptionId;
 
-	@Column(name = "feature_key", nullable = false, length = 100)
-	private String featureKey;
+    @Column(name = "feature_key", nullable = false, length = 100)
+    private String featureKey;
 
-	@Column(name = "used_count")
-	private Integer usedCount = 0;
+    @Column(name = "used_count", nullable = false)
+    private Integer usedCount = 0;
 
-	@Column(name = "created_at", updatable = false)
-	private LocalDateTime createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-	// 🔥 Auto timestamps
-	@PrePersist
-	public void onCreate() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
+    @PrePersist
+    public void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
 
-		if (this.usedCount == null) {
-			this.usedCount = 0;
-		}
-	}
+        if (usedCount == null) {
+            usedCount = 0;
+        }
+    }
 
-	@PreUpdate
-	public void onUpdate() {
-		this.updatedAt = LocalDateTime.now();
-	}
+    @PreUpdate
+    public void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
-	// 🔥 Helper method
-	public void incrementUsage() {
-		this.usedCount = (this.usedCount == null ? 0 : this.usedCount) + 1;
-	}
+    public void incrementUsage() {
+        usedCount++;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    // Getters & Setters
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public Long getUserId() {
-		return userId;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    public Long getUserId() {
+        return userId;
+    }
 
-	public Long getSubscriptionId() {
-		return subscriptionId;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	public void setSubscriptionId(Long subscriptionId) {
-		this.subscriptionId = subscriptionId;
-	}
+    public Long getSubscriptionId() {
+        return subscriptionId;
+    }
 
-	public String getFeatureKey() {
-		return featureKey;
-	}
+    public void setSubscriptionId(Long subscriptionId) {
+        this.subscriptionId = subscriptionId;
+    }
 
-	public void setFeatureKey(String featureKey) {
-		this.featureKey = featureKey;
-	}
+    public String getFeatureKey() {
+        return featureKey;
+    }
 
-	public Integer getUsedCount() {
-		return usedCount;
-	}
+    public void setFeatureKey(String featureKey) {
+        this.featureKey = featureKey;
+    }
 
-	public void setUsedCount(Integer usedCount) {
-		this.usedCount = usedCount;
-	}
+    public Integer getUsedCount() {
+        return usedCount;
+    }
 
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
+    public void setUsedCount(Integer usedCount) {
+        this.usedCount = usedCount;
+    }
 
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 
-	public LocalDateTime getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(LocalDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }

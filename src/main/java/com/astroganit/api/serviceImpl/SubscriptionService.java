@@ -36,7 +36,7 @@ public class SubscriptionService {
 		subscription.setStartDate(LocalDateTime.now());
 		subscription.setEndDate(LocalDateTime.now().plusDays(durationDays));
 		subscription.setStatus("active");
-		subscription.setPaymentId(paymentId);
+		subscription.setPaymentId(Long.valueOf(paymentId));
 
 		return subscriptionRepository.save(subscription);
 	}

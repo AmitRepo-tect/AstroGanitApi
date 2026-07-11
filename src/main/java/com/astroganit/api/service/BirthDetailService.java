@@ -91,7 +91,7 @@ public class BirthDetailService {
 		String featureKey = FeatureKeys.KUNDLI_CREATE;
 
 		// 🔹 2. Feature config
-		PlanFeature feature = planFeatureRepository.findByPlan_PlanIdAndFeatureKey(sub.getPlanId(), featureKey)
+		PlanFeature feature = planFeatureRepository.findByPlan_IdAndFeatureKey(sub.getPlanId(), featureKey)
 				.orElseThrow(() -> new AppException(ResultCode.FEATURE_NOT_ALLOWED));
 
 		int limit = feature.getFeatureLimit();
@@ -101,7 +101,7 @@ public class BirthDetailService {
 		}
 
 		// 🔥 3. Atomic usage update
-		int updated = userFeatureUsageRepository.upsertUsage(userId, sub.getSubscriptionId(), featureKey, limit);
+		int updated = userFeatureUsageRepository.upsertUsage(userId, sub.getId(), featureKey, limit);
 
 		if (updated <= 0) {
 			throw new AppException(ResultCode.LIMIT_REACHED);

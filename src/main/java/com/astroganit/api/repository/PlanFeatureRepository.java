@@ -5,28 +5,23 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.astroganit.api.entities.PlanFeature;
 
 @Repository
-public interface PlanFeatureRepository extends JpaRepository<PlanFeature, Long> {
+public interface PlanFeatureRepository extends JpaRepository<PlanFeature, Integer> {
 
-	// 🔹 1. Get specific feature by plan
-	Optional<PlanFeature> findByPlan_PlanIdAndFeatureKey(int planId, String featureKey);
+	Optional<PlanFeature> findByPlan_IdAndFeatureKey(Integer planId, String featureKey);
 
-	// 🔹 2. Get all features for a plan
-	List<PlanFeature> findByPlan_PlanId(int planId);
+	List<PlanFeature> findByPlan_Id(Integer planId);
 
-	// 🔹 3. Check if feature exists for plan
-	boolean existsByPlan_PlanIdAndFeatureKey(int planId, String featureKey);
+	boolean existsByPlan_IdAndFeatureKey(Integer planId, String featureKey);
 
-	// 🔹 4. Get feature limit
-	@Query("""
-			 SELECT p.featureLimit
-			 FROM PlanFeature p
-			 WHERE p.plan.planId = :planId
-			 AND p.featureKey = :featureKey
-			""")
-	Optional<Integer> findFeatureLimit(int planId, String featureKey);
+	@Query("SELECT pf.featureLimit FROM PlanFeature pf WHERE pf.plan.id = :planId AND pf.featureKey = :featureKey")
+	Optional<Integer> findFeatureLimit(@Param("planId") Integer planId, @Param("featureKey") String featureKey);
+
+	@Query("SELECT pf.featureValue FROM PlanFeature pf WHERE pf.plan.id = :planId AND pf.featureKey = :featureKey")
+	Optional<String> findFeatureValue(@Param("planId") Integer planId, @Param("featureKey") String featureKey);
 }

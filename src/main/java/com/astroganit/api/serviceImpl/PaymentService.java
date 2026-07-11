@@ -1,5 +1,6 @@
 package com.astroganit.api.serviceImpl;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
@@ -8,29 +9,35 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.astroganit.api.entities.Payment;
+import com.astroganit.api.entities.Plan;
 import com.astroganit.api.entities.User;
 import com.astroganit.api.entities.UserSubscription;
+import com.astroganit.api.exception.AppException;
 import com.astroganit.api.model.CreateOrderRequest;
 import com.astroganit.api.model.NotesDto;
 import com.astroganit.api.model.RazorpayOrderDto;
 import com.astroganit.api.payload.PaymentStatus;
 import com.astroganit.api.repository.PaymentRepository;
+import com.astroganit.api.repository.PlanRepository;
 import com.astroganit.api.repository.SubscriptionRepository;
 import com.astroganit.api.repository.UserRepo;
+import com.astroganit.api.util.ResultCode;
 import com.astroganit.lib.panchang.util.AppEnums;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PaymentService {
 	private final SubscriptionRepository subscriptionRepository;
 	private final PaymentRepository paymentRepository;
 	private final UserRepo userRepository;
+	private final PlanRepository planRepository;
 	@Value("${razorpay.key_id}")
 	private String razorpayKey;
 
@@ -38,83 +45,76 @@ public class PaymentService {
 	private String razorpaySecret;
 
 	public PaymentService(PaymentRepository paymentRepository, SubscriptionRepository subscriptionRepository,
-			UserRepo userRepository) {
+			UserRepo userRepository, PlanRepository planRepository) {
 		this.paymentRepository = paymentRepository;
 		this.subscriptionRepository = subscriptionRepository;
 		this.userRepository = userRepository;
+		this.planRepository = planRepository;
 	}
 
+	@Transactional(rollbackFor = Exception.class)
 	public RazorpayOrderDto createOrderSafely(CreateOrderRequest request) throws Exception {
-		// 1️⃣ Validate input
+
 		if (request == null) {
-			throw new Exception("Invalid request");
-		}
-		Long userId = request.getUserId();
-		if (userId <= 0) {
-			userId = userRepository.findUserIdByLoginId(request.getLoginId());
-			if (userId == null) {
-				throw new RuntimeException("User not found");
-			}
+			throw new IllegalArgumentException("Invalid request");
 		}
 
-		if (request.getAmount() <= 0) {
-			throw new Exception("Invalid amount");
-		}
-		if (request.getCurrency() == null || request.getCurrency().isBlank()) {
-			throw new Exception("Invalid currency");
+		User user = getLoggedInUser();
+
+		Plan plan = planRepository.findById(request.getPlanId())
+				.orElseThrow(() -> new AppException(ResultCode.PLAN_NOT_FOUND));
+
+		if (request.getAmount() == null) {
+			throw new IllegalArgumentException("Amount is required");
 		}
 
-		// 2️⃣ Generate idempotency reference
+		if (request.getAmount().compareTo(plan.getPrice()) != 0) {
+			throw new IllegalArgumentException("Invalid plan amount");
+		}
+
 		String referenceId = UUID.randomUUID().toString();
 
-		RazorpayClient client;
 		try {
-			client = new RazorpayClient(razorpayKey, razorpaySecret);
-		} catch (RazorpayException e) {
-			throw new Exception("Payment gateway initialization failed", e);
-		}
 
-		try {
-			// 3️⃣ Build Razorpay order request
+			RazorpayClient client = new RazorpayClient(razorpayKey, razorpaySecret);
+
 			JSONObject orderRequest = new JSONObject();
-			orderRequest.put("amount", request.getAmount() * 100); // paise
-			orderRequest.put("currency", request.getCurrency());
+			orderRequest.put("amount", plan.getPrice().multiply(BigDecimal.valueOf(100)).intValueExact());
+			orderRequest.put("currency", plan.getCurrency());
 			orderRequest.put("payment_capture", 1);
 			orderRequest.put("receipt", referenceId);
 
 			JSONObject notes = new JSONObject();
-			notes.put("userId", userId);
+			notes.put("userId", user.getId());
+			notes.put("planId", plan.getId());
 			notes.put("paymentFor", request.getPaymentFor());
+
 			orderRequest.put("notes", notes);
 
-			// 4️⃣ Create Razorpay order (can fail)
 			Order order = client.orders.create(orderRequest);
 
-			// 5️⃣ Save payment (can fail)
 			Payment payment = new Payment();
-			payment.setUserId(userId);
-			payment.setAmount(request.getAmount());
-			payment.setCurrency(request.getCurrency());
+			payment.setUserId(user.getId());
+			payment.setPlanId(plan.getId());
+			payment.setAmount(plan.getPrice());
+			payment.setCurrency(plan.getCurrency());
+			payment.setDurationDays(plan.getDurationDays());
 			payment.setPaymentFor(request.getPaymentFor());
 			payment.setReferenceId(referenceId);
 			payment.setOrderId(order.get("id"));
-			payment.setStatus(PaymentStatus.CREATED.name());
-			payment.setPaymentMethod("RAZORPAY");
-			payment.setPlanId(request.getPlanId());
-			payment.setDurationDays(request.getDurationDays());
 			payment.setGateway("RAZORPAY");
+			payment.setPaymentMethod("RAZORPAY");
+			payment.setStatus(PaymentStatus.CREATED.name());
 			payment.setSignatureVerified(false);
+
 			paymentRepository.save(payment);
 
-			// 6️⃣ Return minimal safe response
 			return mapToDto(order);
 
-		} catch (RazorpayException ex) {
-			throw new Exception("Unable to create payment order. Please try again.");
-		} catch (DataAccessException ex) {
-			throw new Exception("Payment initialization failed. Please retry.");
-		} catch (Exception ex) {
-			throw new Exception("Unexpected error occurred");
+		} catch (RazorpayException e) {
+			throw new Exception("Unable to create payment order. Please try again.", e);
+		} catch (DataAccessException e) {
+			throw new Exception("Payment initialization failed. Please retry.", e);
 		}
 	}
 
@@ -127,7 +127,7 @@ public class PaymentService {
 		// 🔐 Idempotency: already processed
 		if (PaymentStatus.SUCCESS.name().equals(payment.getStatus())) {
 			// Return existing subscription instead of null
-			return subscriptionRepository.findByPaymentId(payment.getPaymentId())
+			return subscriptionRepository.findByPaymentId(Long.parseLong(payment.getPaymentId()))
 					.orElseThrow(() -> new RuntimeException("Subscription not found for successful payment"));
 		}
 
@@ -162,7 +162,7 @@ public class PaymentService {
 				sub.setPlanId(planId);
 				sub.setStartDate(start);
 				sub.setEndDate(start.plusDays(durationDays));
-				sub.setPaymentId(paymentId);
+				sub.setPaymentId(Long.parseLong(paymentId));
 				sub.setStatus(AppEnums.SubscriptionStatus.ACTIVE.name());
 				return subscriptionRepository.save(sub); // ✅ UPDATE
 			} else {
@@ -172,13 +172,13 @@ public class PaymentService {
 				subscription.setStartDate(start);
 				subscription.setEndDate(start.plusDays(durationDays));
 				subscription.setStatus(AppEnums.SubscriptionStatus.ACTIVE.name());
-				subscription.setPaymentId(paymentId);
+				subscription.setPaymentId(Long.parseLong(paymentId));
 				return subscriptionRepository.save(subscription);
 			}
 
 		} catch (DataIntegrityViolationException ex) {
 			// another thread already created it
-			return subscriptionRepository.findByPaymentId(paymentId).orElseThrow(() -> ex);
+			return subscriptionRepository.findByPaymentId(Long.parseLong(paymentId)).orElseThrow(() -> ex);
 		}
 	}
 
@@ -236,6 +236,19 @@ public class PaymentService {
 	private JSONObject getObject(Order order, String key) {
 		Object value = order.get(key);
 		return value instanceof JSONObject ? (JSONObject) value : null;
+	}
+
+	private User getLoggedInUser() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+		if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+			throw new AppException(ResultCode.UNAUTHORIZED);
+		}
+
+		String loginId = auth.getName();
+		// log.info("Logged in user: {}", loginId);
+
+		return userRepository.findByLoginId(loginId).orElseThrow(() -> new AppException(ResultCode.USER_NOT_FOUND));
 	}
 
 }

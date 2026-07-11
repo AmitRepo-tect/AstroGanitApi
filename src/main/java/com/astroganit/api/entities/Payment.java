@@ -1,215 +1,220 @@
 package com.astroganit.api.entities;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "payments")
 public class Payment {
 
-	/* ========= PRIMARY KEY ========= */
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id; // DB primary key
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	/* ========= RAZORPAY IDS ========= */
-	@Column(name = "order_id", length = 100, unique = true)
-	private String orderId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-	@Column(name = "payment_id", length = 100, unique = true)
-	private String paymentId; // Razorpay payment ID (after success)
+    @Column(name = "plan_id", nullable = false)
+    private Integer planId;
 
-	/* ========= BUSINESS DATA ========= */
-	@Column(name = "user_id", nullable = false)
-	private long userId;
+    @Column(name = "order_id", nullable = false, unique = true, length = 100)
+    private String orderId;
 
-	@Column(name = "plan_id", nullable = false)
-	private int planId;
+    @Column(name = "payment_id", unique = true, length = 100)
+    private String paymentId;
 
-	@Column(name = "duration_days", nullable = false)
-	private int durationDays;
+    @Column(name = "transaction_id", length = 100)
+    private String transactionId;
 
-	@Column(nullable = false)
-	private double amount;
+    @Column(name = "amount", nullable = false, precision = 10, scale = 2)
+    private BigDecimal amount;
 
-	@Column(length = 10, nullable = false)
-	private String currency;
+    @Column(name = "currency", nullable = false, length = 10)
+    private String currency;
 
-	@Column(length = 50, nullable = false)
-	private String status; // CREATED, SUCCESS, FAILED
+    @Column(name = "duration_days", nullable = false)
+    private Integer durationDays;
 
-	@Column(name = "payment_method", length = 50)
-	private String paymentMethod;
+    @Column(name = "gateway", nullable = false, length = 50)
+    private String gateway;
 
-	@Column(name = "payment_for", length = 255)
-	private String paymentFor;
+    @Column(name = "payment_method", length = 50)
+    private String paymentMethod;
 
-	/* ========= TRACKING ========= */
-	@Column(name = "reference_id", length = 255, unique = true)
-	private String referenceId;
+    @Column(name = "status", nullable = false, length = 30)
+    private String status;
 
-	@Column(length = 50)
-	private String gateway; // RAZORPAY
+    @Column(name = "payment_for", length = 100)
+    private String paymentFor;
 
-	@Column(name = "failure_reason", length = 255)
-	private String failureReason;
+    @Column(name = "reference_id", length = 255)
+    private String referenceId;
 
-	@Column(name = "signature_verified")
-	private boolean signatureVerified = false;
+    @Column(name = "signature_verified", nullable = false)
+    private Boolean signatureVerified = false;
 
-	/* ========= AUDIT ========= */
-	@Column(name = "create_date", updatable = false)
-	private LocalDateTime createDate;
+    @Column(name = "failure_reason", length = 255)
+    private String failureReason;
 
-	@Column(name = "update_date")
-	private LocalDateTime updateDate;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Column(name = "create_date", updatable = false)
+    private LocalDateTime createDate;
 
-	/* ========= LIFECYCLE ========= */
-	@PrePersist
-	protected void onCreate() {
-		this.createDate = LocalDateTime.now();
-		this.updateDate = LocalDateTime.now();
-	}
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Column(name = "update_date")
+    private LocalDateTime updateDate;
 
-	@PreUpdate
-	protected void onUpdate() {
-		this.updateDate = LocalDateTime.now();
-	}
+    @PrePersist
+    public void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        createDate = now;
+        updateDate = now;
+    }
 
-	/* ========= GETTERS & SETTERS ========= */
-	public long getId() {
-		return id;
-	}
+    @PreUpdate
+    public void onUpdate() {
+        updateDate = LocalDateTime.now();
+    }
 
-	public void setId(long id) {
-		this.id = id;
-	}
+    // ================= GETTERS & SETTERS =================
 
-	public String getOrderId() {
-		return orderId;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setOrderId(String orderId) {
-		this.orderId = orderId;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getPaymentId() {
-		return paymentId;
-	}
+    public Long getUserId() {
+        return userId;
+    }
 
-	public void setPaymentId(String paymentId) {
-		this.paymentId = paymentId;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	public long getUserId() {
-		return userId;
-	}
+    public Integer getPlanId() {
+        return planId;
+    }
 
-	public void setUserId(long userId) {
-		this.userId = userId;
-	}
+    public void setPlanId(Integer planId) {
+        this.planId = planId;
+    }
 
-	public int getPlanId() {
-		return planId;
-	}
+    public String getOrderId() {
+        return orderId;
+    }
 
-	public void setPlanId(int planId) {
-		this.planId = planId;
-	}
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
 
-	public int getDurationDays() {
-		return durationDays;
-	}
+    public String getPaymentId() {
+        return paymentId;
+    }
 
-	public void setDurationDays(int durationDays) {
-		this.durationDays = durationDays;
-	}
+    public void setPaymentId(String paymentId) {
+        this.paymentId = paymentId;
+    }
 
-	public double getAmount() {
-		return amount;
-	}
+    public String getTransactionId() {
+        return transactionId;
+    }
 
-	public void setAmount(double amount) {
-		this.amount = amount;
-	}
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
 
-	public String getCurrency() {
-		return currency;
-	}
+    public BigDecimal getAmount() {
+        return amount;
+    }
 
-	public void setCurrency(String currency) {
-		this.currency = currency;
-	}
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
 
-	public String getStatus() {
-		return status;
-	}
+    public String getCurrency() {
+        return currency;
+    }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
 
-	public String getPaymentMethod() {
-		return paymentMethod;
-	}
+    public Integer getDurationDays() {
+        return durationDays;
+    }
 
-	public void setPaymentMethod(String paymentMethod) {
-		this.paymentMethod = paymentMethod;
-	}
+    public void setDurationDays(Integer durationDays) {
+        this.durationDays = durationDays;
+    }
 
-	public String getPaymentFor() {
-		return paymentFor;
-	}
+    public String getGateway() {
+        return gateway;
+    }
 
-	public void setPaymentFor(String paymentFor) {
-		this.paymentFor = paymentFor;
-	}
+    public void setGateway(String gateway) {
+        this.gateway = gateway;
+    }
 
-	public String getReferenceId() {
-		return referenceId;
-	}
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
 
-	public void setReferenceId(String referenceId) {
-		this.referenceId = referenceId;
-	}
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
 
-	public String getGateway() {
-		return gateway;
-	}
+    public String getStatus() {
+        return status;
+    }
 
-	public void setGateway(String gateway) {
-		this.gateway = gateway;
-	}
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-	public String getFailureReason() {
-		return failureReason;
-	}
+    public String getPaymentFor() {
+        return paymentFor;
+    }
 
-	public void setFailureReason(String failureReason) {
-		this.failureReason = failureReason;
-	}
+    public void setPaymentFor(String paymentFor) {
+        this.paymentFor = paymentFor;
+    }
 
-	public boolean getSignatureVerified() {
-		return signatureVerified;
-	}
+    public String getReferenceId() {
+        return referenceId;
+    }
 
-	public void setSignatureVerified(boolean signatureVerified) {
-		this.signatureVerified = signatureVerified;
-	}
+    public void setReferenceId(String referenceId) {
+        this.referenceId = referenceId;
+    }
 
-	public LocalDateTime getCreateDate() {
-		return createDate;
-	}
+    public Boolean getSignatureVerified() {
+        return signatureVerified;
+    }
 
-	public void setCreateDate(LocalDateTime createDate) {
-		this.createDate = createDate;
-	}
+    public void setSignatureVerified(Boolean signatureVerified) {
+        this.signatureVerified = signatureVerified;
+    }
 
-	public LocalDateTime getUpdateDate() {
-		return updateDate;
-	}
+    public String getFailureReason() {
+        return failureReason;
+    }
 
-	public void setUpdateDate(LocalDateTime updateDate) {
-		this.updateDate = updateDate;
-	}
+    public void setFailureReason(String failureReason) {
+        this.failureReason = failureReason;
+    }
+
+    public LocalDateTime getCreateDate() {
+        return createDate;
+    }
+
+    public LocalDateTime getUpdateDate() {
+        return updateDate;
+    }
 }

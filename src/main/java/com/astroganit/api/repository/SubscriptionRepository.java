@@ -17,7 +17,7 @@ public interface SubscriptionRepository extends JpaRepository<UserSubscription, 
 
 	Optional<UserSubscription> findByUserId(long userId);
 
-	Optional<UserSubscription> findByPaymentId(String paymentId);
+	Optional<UserSubscription> findByPaymentId(long paymentId);
 
 	@Modifying
 	@Transactional

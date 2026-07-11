@@ -1,5 +1,6 @@
 package com.astroganit.api.entities;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -9,6 +10,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,37 +24,91 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "plans")
 public class Plan {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer planId;
+	private Integer id;
 
+	@Column(name = "plan_code", nullable = false, unique = true, length = 50)
+	private String planCode;
+
+	@Column(name = "name_en", nullable = false, length = 100)
 	private String nameEn;
+
+	@Column(name = "name_hi", nullable = false, length = 100)
 	private String nameHi;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+	@Column(name = "description_en", columnDefinition = "TEXT")
+	private String descriptionEn;
 
-	private double price;
-	private String currency;
+	@Column(name = "description_hi", columnDefinition = "TEXT")
+	private String descriptionHi;
+
+	@Column(nullable = false, precision = 10, scale = 2)
+	private BigDecimal price;
+
+	@Column(nullable = false, length = 10)
+	private String currency = "INR";
+
+	@Column(name = "duration_days", nullable = false)
 	private Integer durationDays;
-	private String planType;
-	private Boolean isActive;
-	private Integer sortOrder;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "plan_type", nullable = false)
+	private PlanType planType;
+
+	@Column(name = "icon_url")
+	private String iconUrl;
+
+	@Column(name = "is_active", nullable = false)
+	private Boolean isActive = true;
+
+	@Column(name = "sort_order", nullable = false)
+	private Integer sortOrder = 0;
+
+	@Column(name = "trial_days", nullable = false)
+	private Integer trialDays = 0;
+
+	@Column(name = "max_users", nullable = false)
+	private Integer maxUsers = 1;
+
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;
+
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+	@Column(name = "updated_at", nullable = false)
 	private LocalDateTime updatedAt;
 
 	@OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JsonManagedReference
 	private List<PlanFeature> features;
 
-	public Integer getPlanId() {
-		return planId;
+	@PrePersist
+	public void prePersist() {
+		createdAt = LocalDateTime.now();
+		updatedAt = LocalDateTime.now();
 	}
 
-	public void setPlanId(Integer planId) {
-		this.planId = planId;
+	@PreUpdate
+	public void preUpdate() {
+		updatedAt = LocalDateTime.now();
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getPlanCode() {
+		return planCode;
+	}
+
+	public void setPlanCode(String planCode) {
+		this.planCode = planCode;
 	}
 
 	public String getNameEn() {
@@ -70,19 +127,27 @@ public class Plan {
 		this.nameHi = nameHi;
 	}
 
-	public String getDescription() {
-		return description;
+	public String getDescriptionEn() {
+		return descriptionEn;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public void setDescriptionEn(String descriptionEn) {
+		this.descriptionEn = descriptionEn;
 	}
 
-	public double getPrice() {
+	public String getDescriptionHi() {
+		return descriptionHi;
+	}
+
+	public void setDescriptionHi(String descriptionHi) {
+		this.descriptionHi = descriptionHi;
+	}
+
+	public BigDecimal getPrice() {
 		return price;
 	}
 
-	public void setPrice(double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
@@ -102,12 +167,20 @@ public class Plan {
 		this.durationDays = durationDays;
 	}
 
-	public String getPlanType() {
+	public PlanType getPlanType() {
 		return planType;
 	}
 
-	public void setPlanType(String planType) {
+	public void setPlanType(PlanType planType) {
 		this.planType = planType;
+	}
+
+	public String getIconUrl() {
+		return iconUrl;
+	}
+
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
 	}
 
 	public Boolean getIsActive() {
@@ -124,6 +197,22 @@ public class Plan {
 
 	public void setSortOrder(Integer sortOrder) {
 		this.sortOrder = sortOrder;
+	}
+
+	public Integer getTrialDays() {
+		return trialDays;
+	}
+
+	public void setTrialDays(Integer trialDays) {
+		this.trialDays = trialDays;
+	}
+
+	public Integer getMaxUsers() {
+		return maxUsers;
+	}
+
+	public void setMaxUsers(Integer maxUsers) {
+		this.maxUsers = maxUsers;
 	}
 
 	public LocalDateTime getCreatedAt() {
@@ -150,14 +239,6 @@ public class Plan {
 		this.features = features;
 	}
 
-	@PrePersist
-	public void prePersist() {
-		createdAt = LocalDateTime.now();
-		updatedAt = LocalDateTime.now();
-	}
+	// Getters and Setters
 
-	@PreUpdate
-	public void preUpdate() {
-		updatedAt = LocalDateTime.now();
-	}
 }

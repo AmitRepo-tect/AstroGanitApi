@@ -6,18 +6,24 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import com.astroganit.api.entities.Plan;
 
+@Repository
 public interface PlanRepository extends JpaRepository<Plan, Integer> {
-	Optional<Plan> findByPlanId(Long id);
 
-	List<Plan> findByIsActiveTrue();
+    // JpaRepository already provides findById(Integer id),
+    // so this method is optional. You can remove it completely.
+    Optional<Plan> findById(Integer id);
 
-	@EntityGraph(attributePaths = "features")
-	List<Plan> findByIsActiveTrueOrderBySortOrderAsc();
+    Optional<Plan> findByPlanCode(String planCode);
 
-	@Query("SELECT p FROM Plan p LEFT JOIN FETCH p.features WHERE p.isActive = true")
-	List<Plan> findActivePlansWithFeatures();
-	
+    List<Plan> findByIsActiveTrue();
+
+    @EntityGraph(attributePaths = "features")
+    List<Plan> findByIsActiveTrueOrderBySortOrderAsc();
+
+    @Query("SELECT p FROM Plan p LEFT JOIN FETCH p.features WHERE p.isActive = true ORDER BY p.sortOrder ASC")
+    List<Plan> findActivePlansWithFeatures();
 }

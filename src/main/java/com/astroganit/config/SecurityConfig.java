@@ -28,7 +28,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 )
 public class SecurityConfig {
    public static final String[] PUBLIC_URLS = new String[]{"/api/ganit/v1/auth/token", "/", "/v3/api-docs", "/v2/api-docs", "/swagger-resources/**", "/swagger-ui/**", "/webjars/**", "/**"};
-   public static final String[] AUTH_URLS = new String[]{"/api/user/update/profile/**","/api/birth-details"};
+   public static final String[] AUTH_URLS = new String[]{"/api/user/update/profile/**","/api/birth-details","/api/payment"};
    @Autowired
    private CustomUserDetailService customUserDetailService;
    @Autowired
