@@ -1,14 +1,15 @@
 package com.astroganit.api.exception;
 
+import com.astroganit.api.util.ResultCode;
+
 public class ResourceNotFoundException extends AppException {
 
-	private static final String DEFAULT_MESSAGE = "Resource not found";
 
 	public ResourceNotFoundException(String msg) {
-		super(ErrorCodes.RESOURCE_NOT_FOUND, msg);
+		super(ResultCode.RESOURCE_NOT_FOUND);
 	}
 
 	public ResourceNotFoundException() {
-		super(ErrorCodes.RESOURCE_NOT_FOUND, DEFAULT_MESSAGE);
+		super(ResultCode.RESOURCE_NOT_FOUND);
 	}
 }

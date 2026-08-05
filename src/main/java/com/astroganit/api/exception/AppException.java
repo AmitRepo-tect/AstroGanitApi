@@ -1,30 +1,30 @@
 package com.astroganit.api.exception;
 
+import java.util.Objects;
+
 import com.astroganit.api.util.ResultCode;
 
 public class AppException extends RuntimeException {
 
-	private final int code;
-	private final String message;
+	private static final long serialVersionUID = 1L;
 
-	public AppException(int code, String message) {
-		super(message);
-		this.code = code;
-		this.message = message;
-	}
+	private final ResultCode resultCode;
 
 	public AppException(ResultCode resultCode) {
-		super(resultCode.getMessage());
-		this.code = resultCode.getCode();
-		this.message = resultCode.getMessage();
+		super(Objects.requireNonNull(resultCode, "ResultCode cannot be null").getMessage());
+		this.resultCode = resultCode;
+	}
+
+	public ResultCode getResultCode() {
+		return resultCode;
 	}
 
 	public int getCode() {
-		return code;
+		return resultCode.getCode();
 	}
 
 	@Override
 	public String getMessage() {
-		return message;
+		return resultCode.getMessage();
 	}
 }

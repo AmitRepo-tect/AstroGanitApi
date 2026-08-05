@@ -1,12 +1,14 @@
 package com.astroganit.api.exception;
 
+import com.astroganit.api.util.ResultCode;
+
 public class UsernamePasswordException extends AppException {
 
 	public UsernamePasswordException() {
-		super(ErrorCodes.USER_PASSWORD_NOT_CORRECT, "Invalid username or password");
+		super(ResultCode.USER_PASSWORD_NOT_CORRECT);
 	}
 
 	public UsernamePasswordException(String message) {
-		super(ErrorCodes.USER_PASSWORD_NOT_CORRECT, message);
+		super(ResultCode.USER_PASSWORD_NOT_CORRECT);
 	}
 }

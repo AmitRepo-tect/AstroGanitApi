@@ -1,47 +1,42 @@
 package com.astroganit.api.service;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-
 import com.astroganit.api.payload.OTPDto;
 import com.astroganit.api.payload.Response;
 import com.astroganit.api.payload.ResponseNew;
 import com.astroganit.api.payload.UserDto;
 import com.astroganit.api.payload.UserResponse;
+import java.util.List;
+import org.springframework.stereotype.Service;
 
 @Service
 public interface UserService {
-	ResponseNew<List<UserResponse>> requestLoginOtp(UserDto userDto);
+   ResponseNew<List<UserResponse>> requestLoginOtp(UserDto userDto);
 
-	ResponseNew<List<String>> verifyOtp(String mobile, String otpCode);
+   ResponseNew<List<String>> verifyOtp(String mobile, String otpCode);
 
-	ResponseNew<Void> resendOTP(String mobile);
+   ResponseNew<Void> resendOTP(String mobile);
 
-	ResponseNew<List<UserResponse>> updateUserProfileV1(UserDto user);
-	
-	ResponseNew<List<UserResponse>> getUserProfile();
+   ResponseNew<List<UserResponse>> updateUserProfileV1(UserDto user);
 
-	UserDto registerNewUser(UserDto user);
+   ResponseNew<List<UserResponse>> getUserProfile();
 
-	/*
-	 * Response updateUserProfile(UserDto user);
-	 */
-	Boolean checkMobileNumberExit(String mobile);
+   UserDto registerNewUser(UserDto user);
 
-	Response loginUser(UserDto userDto);
+   Boolean checkMobileNumberExit(String mobile);
 
-	Response updatePassword(UserDto userDto);
+   Response loginUser(UserDto userDto);
 
-	String sendOTPForLoginSignup(String mobile);
+   Response updatePassword(UserDto userDto);
 
-	void generateOtp(String mobile);
+   String sendOTPForLoginSignup(String mobile);
 
-	Response validateOTP(OTPDto otpDto);
+   void generateOtp(String mobile);
 
-	void deleteUser(Long userId);
+   Response validateOTP(OTPDto otpDto);
 
-	Response deactivateUser();
+   void deleteUser(Long userId);
 
-	Response activateUser();
+   Response deactivateUser();
+
+   Response activateUser();
 }

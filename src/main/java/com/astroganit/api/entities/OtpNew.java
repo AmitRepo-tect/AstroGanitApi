@@ -18,24 +18,25 @@ public class OtpNew {
 	@Column(nullable = false, length = 15)
 	private String mobile;
 
-	@Column(nullable = false, length = 100)
+	@Column(name = "otp_code", nullable = false, length = 100)
 	private String otpCode;
 
-	@Column(nullable = false)
+	@Column(name = "expires_at", nullable = false)
 	private LocalDateTime expiresAt;
 
-	@Column(nullable = false)
+	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt = LocalDateTime.now();
 
-	@Column(nullable = false)
-	private boolean isUsed = false;
+	@Column(name = "is_used", nullable = false)
+	private boolean used = false;
 
-	@Column(nullable = false)
+	@Column(name = "attempts", nullable = false)
 	private int attempts = 0;
-	@Column(nullable = false)
+
+	@Column(name = "send_count", nullable = false)
 	private int sendCount = 0;
 
-	@Column
+	@Column(name = "last_sent_at")
 	private LocalDateTime lastSentAt;
 
 	public void setMobile(String mobile) {
@@ -75,11 +76,11 @@ public class OtpNew {
 	}
 
 	public boolean isUsed() {
-		return isUsed;
+		return used;
 	}
 
 	public void setUsed(boolean isUsed) {
-		this.isUsed = isUsed;
+		this.used = isUsed;
 	}
 
 	public int getAttempts() {

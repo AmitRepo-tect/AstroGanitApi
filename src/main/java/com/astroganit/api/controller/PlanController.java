@@ -40,7 +40,7 @@ public class PlanController {
 		List<PlanResponse> plans = planService.getAllActivePlans();
 
 		ResponseNew<List<PlanResponse>> response = new ResponseNew<>();
-			
+		
 		response.setStatus(HttpStatus.OK);
 		response.setStatusCode(HttpStatus.OK.value());
 		response.setResultCode(ResultCode.SUCCESS.getCode());

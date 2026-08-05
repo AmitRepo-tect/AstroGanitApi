@@ -1,8 +1,10 @@
 package com.astroganit.api.exception;
 
+import com.astroganit.api.util.ResultCode;
+
 public class LimitExceededException extends AppException {
 
 	public LimitExceededException(String message) {
-		super(ErrorCodes.LIMIT_EXCEEDED, message);
+		super(ResultCode.LIMIT_REACHED);
 	}
 }

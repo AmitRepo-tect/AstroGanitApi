@@ -11,132 +11,155 @@ import jakarta.persistence.*;
 @Table(name = "user_subscriptions")
 public class UserSubscription {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(name = "user_id", nullable = false)
-	private Long userId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-	@Column(name = "plan_id", nullable = false)
-	private Integer planId;
+    @Column(name = "plan_id", nullable = false)
+    private Integer planId;
 
-	@Column(name = "payment_id")
-	private Long paymentId;
+    @Column(name = "payment_id")
+    private Long paymentId;
 
-	@Column(name = "start_date", nullable = false)
-	private LocalDateTime startDate;
+    @Column(name = "start_date", nullable = false)
+    private LocalDateTime startDate;
 
-	@Column(name = "end_date", nullable = false)
-	private LocalDateTime endDate;
+    @Column(name = "end_date", nullable = false)
+    private LocalDateTime endDate;
 
-	@Column(name = "amount_paid", precision = 10, scale = 2)
-	private BigDecimal amountPaid;
+    @Column(name = "renewal_date")
+    private LocalDateTime renewalDate;
 
-	@Column(name = "status", length = 20)
-	private String status;
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
 
-	@Column(name = "auto_renew")
-	private Boolean autoRenew = false;
+    @Column(name = "amount_paid", nullable = false, precision = 10, scale = 2)
+    private BigDecimal amountPaid = BigDecimal.ZERO;
 
-	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-	@Column(name = "created_at")
-	private LocalDateTime createdAt;
+    @Column(name = "status", nullable = false, length = 20)
+    private String status = "PENDING";
 
-	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
+    @Column(name = "auto_renew", nullable = false)
+    private Boolean autoRenew = false;
 
-	@PrePersist
-	public void prePersist() {
-		createdAt = LocalDateTime.now();
-		updatedAt = LocalDateTime.now();
-	}
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-	@PreUpdate
-	public void preUpdate() {
-		updatedAt = LocalDateTime.now();
-	}
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
-	// Getters & Setters
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    // ================= GETTERS & SETTERS =================
 
-	public Long getUserId() {
-		return userId;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public Integer getPlanId() {
-		return planId;
-	}
+    public Long getUserId() {
+        return userId;
+    }
 
-	public void setPlanId(Integer planId) {
-		this.planId = planId;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	public Long getPaymentId() {
-		return paymentId;
-	}
+    public Integer getPlanId() {
+        return planId;
+    }
 
-	public void setPaymentId(Long paymentId) {
-		this.paymentId = paymentId;
-	}
+    public void setPlanId(Integer planId) {
+        this.planId = planId;
+    }
 
-	public LocalDateTime getStartDate() {
-		return startDate;
-	}
+    public Long getPaymentId() {
+        return paymentId;
+    }
 
-	public void setStartDate(LocalDateTime startDate) {
-		this.startDate = startDate;
-	}
+    public void setPaymentId(Long paymentId) {
+        this.paymentId = paymentId;
+    }
 
-	public LocalDateTime getEndDate() {
-		return endDate;
-	}
+    public LocalDateTime getStartDate() {
+        return startDate;
+    }
 
-	public void setEndDate(LocalDateTime endDate) {
-		this.endDate = endDate;
-	}
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
 
-	public BigDecimal getAmountPaid() {
-		return amountPaid;
-	}
+    public LocalDateTime getEndDate() {
+        return endDate;
+    }
 
-	public void setAmountPaid(BigDecimal amountPaid) {
-		this.amountPaid = amountPaid;
-	}
+    public void setEndDate(LocalDateTime endDate) {
+        this.endDate = endDate;
+    }
 
-	public String getStatus() {
-		return status;
-	}
+    public LocalDateTime getRenewalDate() {
+        return renewalDate;
+    }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
+    public void setRenewalDate(LocalDateTime renewalDate) {
+        this.renewalDate = renewalDate;
+    }
 
-	public Boolean getAutoRenew() {
-		return autoRenew;
-	}
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
 
-	public void setAutoRenew(Boolean autoRenew) {
-		this.autoRenew = autoRenew;
-	}
+    public void setCancelledAt(LocalDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
+    }
 
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
+    public BigDecimal getAmountPaid() {
+        return amountPaid;
+    }
 
-	public LocalDateTime getUpdatedAt() {
-		return updatedAt;
-	}
+    public void setAmountPaid(BigDecimal amountPaid) {
+        this.amountPaid = amountPaid;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Boolean getAutoRenew() {
+        return autoRenew;
+    }
+
+    public void setAutoRenew(Boolean autoRenew) {
+        this.autoRenew = autoRenew;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }

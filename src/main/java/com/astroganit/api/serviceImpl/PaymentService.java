@@ -2,10 +2,13 @@ package com.astroganit.api.serviceImpl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,11 +23,14 @@ import com.astroganit.api.exception.AppException;
 import com.astroganit.api.model.CreateOrderRequest;
 import com.astroganit.api.model.NotesDto;
 import com.astroganit.api.model.RazorpayOrderDto;
+import com.astroganit.api.model.RazorpayOrderResponse;
 import com.astroganit.api.payload.PaymentStatus;
 import com.astroganit.api.repository.PaymentRepository;
 import com.astroganit.api.repository.PlanRepository;
 import com.astroganit.api.repository.SubscriptionRepository;
 import com.astroganit.api.repository.UserRepo;
+import com.astroganit.api.response.VerifyPaymentResponse;
+import com.astroganit.api.service.BirthDetailService;
 import com.astroganit.api.util.ResultCode;
 import com.astroganit.lib.panchang.util.AppEnums;
 import com.razorpay.Order;
@@ -34,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PaymentService {
+	private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
 	private final SubscriptionRepository subscriptionRepository;
 	private final PaymentRepository paymentRepository;
 	private final UserRepo userRepository;
@@ -53,10 +60,10 @@ public class PaymentService {
 	}
 
 	@Transactional(rollbackFor = Exception.class)
-	public RazorpayOrderDto createOrderSafely(CreateOrderRequest request) throws Exception {
+	public RazorpayOrderResponse createOrderSafely(CreateOrderRequest request) {
 
 		if (request == null) {
-			throw new IllegalArgumentException("Invalid request");
+			throw new AppException(ResultCode.INVALID_REQUEST);
 		}
 
 		User user = getLoggedInUser();
@@ -64,35 +71,37 @@ public class PaymentService {
 		Plan plan = planRepository.findById(request.getPlanId())
 				.orElseThrow(() -> new AppException(ResultCode.PLAN_NOT_FOUND));
 
+		if (!Boolean.TRUE.equals(plan.getIsActive())) {
+			throw new AppException(ResultCode.PLAN_NOT_AVAILABLE);
+		}
+
 		if (request.getAmount() == null) {
-			throw new IllegalArgumentException("Amount is required");
+			throw new AppException(ResultCode.AMOUNT_IS_REQUIRED);
 		}
 
 		if (request.getAmount().compareTo(plan.getPrice()) != 0) {
-			throw new IllegalArgumentException("Invalid plan amount");
+			throw new AppException(ResultCode.INVALID_PLAN_AMOUNT);
 		}
 
+		if (request.getPaymentFor() == null || request.getPaymentFor().isBlank()) {
+			throw new AppException(ResultCode.INVALID_REQUEST);
+		}
 		String referenceId = UUID.randomUUID().toString();
 
 		try {
 
 			RazorpayClient client = new RazorpayClient(razorpayKey, razorpaySecret);
-
 			JSONObject orderRequest = new JSONObject();
 			orderRequest.put("amount", plan.getPrice().multiply(BigDecimal.valueOf(100)).intValueExact());
 			orderRequest.put("currency", plan.getCurrency());
 			orderRequest.put("payment_capture", 1);
 			orderRequest.put("receipt", referenceId);
-
 			JSONObject notes = new JSONObject();
 			notes.put("userId", user.getId());
 			notes.put("planId", plan.getId());
 			notes.put("paymentFor", request.getPaymentFor());
-
 			orderRequest.put("notes", notes);
-
 			Order order = client.orders.create(orderRequest);
-
 			Payment payment = new Payment();
 			payment.setUserId(user.getId());
 			payment.setPlanId(plan.getId());
@@ -106,79 +115,96 @@ public class PaymentService {
 			payment.setPaymentMethod("RAZORPAY");
 			payment.setStatus(PaymentStatus.CREATED.name());
 			payment.setSignatureVerified(false);
-
 			paymentRepository.save(payment);
-
-			return mapToDto(order);
-
+			return mapToResponse(order);
 		} catch (RazorpayException e) {
-			throw new Exception("Unable to create payment order. Please try again.", e);
+			System.out.println(e.getMessage());
+			log.error("Failed to create Razorpay order", e);
+			throw new AppException(ResultCode.PAYMENT_GATEWAY_ERROR);
 		} catch (DataAccessException e) {
-			throw new Exception("Payment initialization failed. Please retry.", e);
+			log.error("Failed to save payment", e);
+			throw new AppException(ResultCode.PAYMENT_INITIALIZATION_FAILED);
 		}
 	}
 
 	@Transactional
-	public UserSubscription finalizePayment(String orderId, String paymentId) {
+	public VerifyPaymentResponse finalizePayment(String orderId, String razorpayPaymentId) {
 
 		Payment payment = paymentRepository.findByOrderId(orderId)
-				.orElseThrow(() -> new RuntimeException("Payment not found"));
+				.orElseThrow(() -> new AppException(ResultCode.PAYMENT_NOT_FOUND));
 
-		// 🔐 Idempotency: already processed
+		// Already processed (idempotent)
+
 		if (PaymentStatus.SUCCESS.name().equals(payment.getStatus())) {
-			// Return existing subscription instead of null
-			return subscriptionRepository.findByPaymentId(Long.parseLong(payment.getPaymentId()))
-					.orElseThrow(() -> new RuntimeException("Subscription not found for successful payment"));
+
+			UserSubscription subscription = subscriptionRepository.findByPaymentId(payment.getId())
+					.orElseThrow(() -> new AppException(ResultCode.SUBSCRIPTION_NOT_FOUND));
+
+			return mapToVerifyResponse(subscription);
 		}
 
-		// ❌ Do not revive failed payments
+		// Already failed
 		if (PaymentStatus.FAILED.name().equals(payment.getStatus())) {
-			throw new RuntimeException("Payment already failed");
+			throw new AppException(ResultCode.PAYMENT_ALREADY_FAILED);
 		}
 
-		// 🔍 Validate paymentId mismatch (only if already set)
-		if (payment.getPaymentId() != null && !payment.getPaymentId().equals(paymentId)) {
-			throw new RuntimeException("Payment ID mismatch");
+		// Prevent payment id tampering
+		if (payment.getPaymentId() != null && !payment.getPaymentId().equals(razorpayPaymentId)) {
+			throw new AppException(ResultCode.INVALID_PAYMENT);
 		}
 
-		// 1️⃣ Mark payment SUCCESS (state first)
 		payment.setSignatureVerified(true);
 		payment.setStatus(PaymentStatus.SUCCESS.name());
-		payment.setPaymentId(paymentId);
-		paymentRepository.save(payment);
+		payment.setPaymentId(razorpayPaymentId);
+		payment.setPaymentDate(LocalDateTime.now());
 
-		// 2️⃣ Activate subscription (idempotent)
-		return activateSubscription(payment.getUserId(), payment.getPlanId(), payment.getDurationDays(), paymentId);
+		paymentRepository.save(payment);
+		UserSubscription userSubscription = activateSubscription(payment.getUserId(), payment.getPlanId(),
+				payment.getDurationDays(), payment.getId(), // DB payment id
+				payment.getAmount());
+		return mapToVerifyResponse(userSubscription);
 	}
 
 	@Transactional
-	public UserSubscription activateSubscription(long userId, int planId, int durationDays, String paymentId) {
+	public UserSubscription activateSubscription(long userId, int planId, int durationDays, Long paymentDbId,
+			BigDecimal amountPaid) {
+
 		Optional<UserSubscription> existing = subscriptionRepository.findByUserId(userId);
+
 		LocalDateTime start = LocalDateTime.now();
+		LocalDateTime end = start.plusDays(durationDays);
 
 		try {
+
+			UserSubscription subscription;
+
 			if (existing.isPresent()) {
-				UserSubscription sub = existing.get();
-				sub.setPlanId(planId);
-				sub.setStartDate(start);
-				sub.setEndDate(start.plusDays(durationDays));
-				sub.setPaymentId(Long.parseLong(paymentId));
-				sub.setStatus(AppEnums.SubscriptionStatus.ACTIVE.name());
-				return subscriptionRepository.save(sub); // ✅ UPDATE
+
+				subscription = existing.get();
+
 			} else {
-				UserSubscription subscription = new UserSubscription();
+
+				subscription = new UserSubscription();
 				subscription.setUserId(userId);
-				subscription.setPlanId(planId);
-				subscription.setStartDate(start);
-				subscription.setEndDate(start.plusDays(durationDays));
-				subscription.setStatus(AppEnums.SubscriptionStatus.ACTIVE.name());
-				subscription.setPaymentId(Long.parseLong(paymentId));
-				return subscriptionRepository.save(subscription);
+
 			}
 
+			subscription.setPlanId(planId);
+			subscription.setPaymentId(paymentDbId);
+			subscription.setAmountPaid(amountPaid);
+
+			subscription.setStartDate(start);
+			subscription.setEndDate(end);
+			subscription.setRenewalDate(end);
+
+			subscription.setStatus(AppEnums.SubscriptionStatus.ACTIVE.name());
+			subscription.setAutoRenew(false);
+
+			return subscriptionRepository.save(subscription);
+
 		} catch (DataIntegrityViolationException ex) {
-			// another thread already created it
-			return subscriptionRepository.findByPaymentId(Long.parseLong(paymentId)).orElseThrow(() -> ex);
+
+			return subscriptionRepository.findByPaymentId(paymentDbId).orElseThrow(() -> ex);
 		}
 	}
 
@@ -211,6 +237,16 @@ public class PaymentService {
 		}
 
 		return dto;
+	}
+
+	private RazorpayOrderResponse mapToResponse(Order order) {
+
+		RazorpayOrderResponse response = new RazorpayOrderResponse();
+		response.setId(getString(order, "id"));
+		response.setAmount(getInt(order, "amount"));
+		response.setCurrency(getString(order, "currency"));
+
+		return response;
 	}
 
 	private String getString(Order order, String key) {
@@ -249,6 +285,26 @@ public class PaymentService {
 		// log.info("Logged in user: {}", loginId);
 
 		return userRepository.findByLoginId(loginId).orElseThrow(() -> new AppException(ResultCode.USER_NOT_FOUND));
+	}
+
+	private VerifyPaymentResponse mapToVerifyResponse(UserSubscription subscription) {
+
+		VerifyPaymentResponse response = new VerifyPaymentResponse();
+		if (subscription != null) {
+			response.setSubscriptionId(subscription.getId());
+			response.setPlanId(subscription.getPlanId());
+			Plan plan = planRepository.findById(subscription.getPlanId()).orElse(null);
+			response.setPlanName(plan != null ? plan.getNameEn() : "");
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			response.setStartDate(subscription.getStartDate().format(formatter));
+			response.setEndDate(subscription.getEndDate().format(formatter));
+			response.setStatus(subscription.getStatus());
+			response.setAutoRenew(Boolean.TRUE.equals(subscription.getAutoRenew()));
+			response.setHasSubscription(true);
+		} else {
+			response.setHasSubscription(false);
+		}
+		return response;
 	}
 
 }

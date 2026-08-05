@@ -34,7 +34,7 @@ public class Payment {
     private BigDecimal amount;
 
     @Column(name = "currency", nullable = false, length = 10)
-    private String currency;
+    private String currency = "INR";
 
     @Column(name = "duration_days", nullable = false)
     private Integer durationDays;
@@ -45,13 +45,19 @@ public class Payment {
     @Column(name = "payment_method", length = 50)
     private String paymentMethod;
 
+    @Column(name = "payment_date")
+    private LocalDateTime paymentDate;
+
     @Column(name = "status", nullable = false, length = 30)
-    private String status;
+    private String status = "CREATED";
+
+    @Column(name = "refund_status", nullable = false, length = 30)
+    private String refundStatus = "NOT_REFUNDED";
 
     @Column(name = "payment_for", length = 100)
     private String paymentFor;
 
-    @Column(name = "reference_id", length = 255)
+    @Column(name = "reference_id", nullable = false, length = 255)
     private String referenceId;
 
     @Column(name = "signature_verified", nullable = false)
@@ -61,23 +67,23 @@ public class Payment {
     private String failureReason;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @Column(name = "create_date", updatable = false)
-    private LocalDateTime createDate;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @Column(name = "update_date")
-    private LocalDateTime updateDate;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     @PrePersist
-    public void onCreate() {
+    protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
-        createDate = now;
-        updateDate = now;
+        createdAt = now;
+        updatedAt = now;
     }
 
     @PreUpdate
-    public void onUpdate() {
-        updateDate = LocalDateTime.now();
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 
     // ================= GETTERS & SETTERS =================
@@ -170,12 +176,28 @@ public class Payment {
         this.paymentMethod = paymentMethod;
     }
 
+    public LocalDateTime getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(LocalDateTime paymentDate) {
+        this.paymentDate = paymentDate;
+    }
+
     public String getStatus() {
         return status;
     }
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getRefundStatus() {
+        return refundStatus;
+    }
+
+    public void setRefundStatus(String refundStatus) {
+        this.refundStatus = refundStatus;
     }
 
     public String getPaymentFor() {
@@ -210,11 +232,11 @@ public class Payment {
         this.failureReason = failureReason;
     }
 
-    public LocalDateTime getCreateDate() {
-        return createDate;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public LocalDateTime getUpdateDate() {
-        return updateDate;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }

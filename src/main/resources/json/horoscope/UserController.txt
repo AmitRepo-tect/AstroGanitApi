@@ -1,7 +1,6 @@
 package com.astroganit.api.controller;
 
 import com.astroganit.api.payload.ApiResponse;
-import com.astroganit.api.payload.DeleteAccountResponse;
 import com.astroganit.api.payload.LoginOtpResponse;
 import com.astroganit.api.payload.LoginRequestDto;
 import com.astroganit.api.payload.LoginResponse;
@@ -12,56 +11,33 @@ import com.astroganit.api.payload.Response;
 import com.astroganit.api.payload.ResponseNew;
 import com.astroganit.api.payload.UserDto;
 import com.astroganit.api.payload.UserResponse;
-import com.astroganit.api.service.UserServiceV2;
 import com.astroganit.api.service.UserService;
 
 import jakarta.validation.Valid;
+
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping({ "/api/user" })
 public class UserController {
 	@Autowired
-	private UserServiceV2 userServiceV2;
-	@Autowired
 	private UserService userService;
 
-	@PostMapping({ "/login_v2" })
-	public ResponseEntity<ResponseNew<LoginOtpResponse>> loginV2(@RequestBody LoginRequestDto request) {
-		ResponseNew<LoginOtpResponse> loginResponse = this.userServiceV2.requestLoginOtp2(request);
+	@PostMapping({ "/login" })
+	public ResponseEntity<Response> login(@RequestBody UserDto userDto) {
+		Response loginResponse = this.userService.loginUser(userDto);
 		return ResponseEntity.ok(loginResponse);
 	}
-
-	@GetMapping({ "/sendotp_v2/{mobile}" })
-	public ResponseEntity<ResponseNew<ResendOtpResponse>> resendOtp(@PathVariable String mobile,
-			@RequestParam(defaultValue = "false") boolean restoreFlow) {
-		ResponseNew<ResendOtpResponse> response = this.userServiceV2.resendOTP(mobile, restoreFlow);
-		return ResponseEntity.ok(response);
-	}
-
-	@PostMapping({ "/validateotp_v2" })
-	public ResponseEntity<ResponseNew<LoginResponse>> validateOTPv2(@Valid @RequestBody OTPRequestDto request) {
-		ResponseNew<LoginResponse> validateOTP = this.userServiceV2.verifyOtpV2(request.getMobile(), request.getOtp());
-		return ResponseEntity.ok(validateOTP);
-	}
-
-	@DeleteMapping("/delete")
-	public ResponseEntity<ResponseNew<DeleteAccountResponse>> deleteUser() {
-		return ResponseEntity.ok(userServiceV2.deleteUserV2());
-	}
-
-	/*--Old--*/
 
 	@PostMapping({ "/login_v1" })
 	public ResponseEntity<ResponseNew<List<UserResponse>>> loginNew(@RequestBody UserDto userDto) {
@@ -69,9 +45,15 @@ public class UserController {
 		return ResponseEntity.ok(loginResponse);
 	}
 
+	@PostMapping({ "/login_v2" })
+	public ResponseEntity<ResponseNew<LoginOtpResponse>> loginV2(@RequestBody LoginRequestDto request) {
+		ResponseNew<LoginOtpResponse> loginResponse = this.userService.requestLoginOtp2(request);
+		return ResponseEntity.ok(loginResponse);
+	}
+
 	@GetMapping({ "/sendotp/{mobile}" })
-	public ResponseEntity<ResponseNew<Void>> sendOTP(@PathVariable String mobile) {
-		ResponseNew<Void> response = this.userService.resendOTP(mobile);
+	public ResponseEntity<ResponseNew<ResendOtpResponse>> sendOTP(@PathVariable String mobile) {
+		ResponseNew<ResendOtpResponse> response = this.userService.resendOTP(mobile);
 		return ResponseEntity.ok(response);
 	}
 
@@ -81,27 +63,33 @@ public class UserController {
 		return ResponseEntity.ok(validateOTP);
 	}
 
+	@PostMapping({ "/validateotp_v2" })
+	public ResponseEntity<ResponseNew<LoginResponse>> validateOTPv2(@Valid @RequestBody OTPRequestDto request) {
+		ResponseNew<LoginResponse> validateOTP = this.userService.verifyOtpV2(request.getMobile(), request.getOtp());
+		return ResponseEntity.ok(validateOTP);
+	}
+
 	@PostMapping({ "/update/profile" })
-	public ResponseEntity<ResponseNew<List<UserResponse>>> updateUserProfileV1(@RequestBody UserDto useDto) {
-		ResponseNew<List<UserResponse>> updateUserDto = this.userService.updateUserProfileV1(useDto);
+	public ResponseEntity<ResponseNew<UserResponse>> updateUserProfileV1(@RequestBody UserDto useDto) {
+		ResponseNew<UserResponse> updateUserDto = this.userService.updateUserProfileV1(useDto);
 		return ResponseEntity.ok(updateUserDto);
 	}
 
-	@GetMapping({ "/profile" })
-	public ResponseEntity<ResponseNew<List<UserResponse>>> getUserProfile() {
-		ResponseNew<List<UserResponse>> response = this.userService.getUserProfile();
+	@GetMapping("/profile")
+	public ResponseEntity<ResponseNew<UserResponse>> getUserProfile() {
+		ResponseNew<UserResponse> response = userService.getUserProfile();
 		return ResponseEntity.ok(response);
-	}
-
-	@PostMapping({ "/login" })
-	public ResponseEntity<Response> login(@RequestBody UserDto userDto) {
-		Response loginResponse = this.userService.loginUser(userDto);
-		return ResponseEntity.ok(loginResponse);
 	}
 
 	@PostMapping({ "/activateuser/{mobile}" })
 	public ResponseEntity<Response> activateUser(@PathVariable String mobile) {
 		Response activateUser = this.userService.activateUser();
+		return ResponseEntity.ok(activateUser);
+	}
+
+	@GetMapping({ "/activateuser_v2/{mobile}" })
+	public ResponseEntity<ResponseNew<UserResponse>> activateUserV2(@PathVariable String mobile) {
+		ResponseNew<UserResponse> activateUser = this.userService.activateUser2();
 		return ResponseEntity.ok(activateUser);
 	}
 
@@ -111,15 +99,16 @@ public class UserController {
 		return ResponseEntity.ok(dectivateUser);
 	}
 
+	@GetMapping({ "/deactivateuser_v2/{mobile}" })
+	public ResponseEntity<ResponseNew<Void>> dectivateUserV2(@PathVariable String mobile) {
+		ResponseNew<Void> dectivateUser = this.userService.deactivateUser2();
+		return ResponseEntity.ok(dectivateUser);
+	}
+
 	@GetMapping({ "/delete/{id}" })
 	public ResponseEntity<?> deleteUser(@PathVariable Long id) {
 		this.userService.deleteUser(id);
 		return new ResponseEntity(new ApiResponse("user deleted successfully"), HttpStatus.OK);
 	}
 
-	@PostMapping({ "/update/password" })
-	public ResponseEntity<Response> updatePassword(@RequestBody UserDto useDto) {
-		Response updatePassword = this.userService.updatePassword(useDto);
-		return ResponseEntity.ok(updatePassword);
-	}
 }

@@ -6,15 +6,12 @@ import com.astroganit.api.exception.UsernamePasswordException;
 import com.astroganit.api.payload.JwtAuthRequest;
 import com.astroganit.api.payload.Response;
 import com.astroganit.api.payload.ResponseNew;
-import com.astroganit.api.payload.UserDto;
-import com.astroganit.api.payload.UserResponse;
 import com.astroganit.api.repository.UserRepo;
-import com.astroganit.api.service.UserService;
+import com.astroganit.api.service.UserServiceV2;
 import com.astroganit.api.util.ResultCode;
 import com.astroganit.lib.panchang.util.AppResultConstant;
 import com.astroganit.security.JwtTokenHelper;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -44,7 +41,7 @@ public class AuthController {
 	@Autowired
 	private AuthenticationManager authenticationManger;
 	@Autowired
-	private UserService userService;
+	private UserServiceV2 userService;
 	@Autowired
 	private ModelMapper modelMapper;
 
@@ -105,33 +102,26 @@ public class AuthController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PostMapping({ "/register" })
-	public ResponseEntity<Response> registeredNewUser(@RequestBody UserDto userDto) {
-		userDto.setDcrptpassword(userDto.getPassword());
-		if (userDto.getName() == null) {
-			userDto.setName("");
-		}
-		String loginID = userDto.getLoginId();
-		String mobileNo = userDto.getMobile();
-		Response response = new Response();
-		response.setErrorMessage("");
-		response.setStatus(HttpStatus.OK);
-		boolean isUserExist = this.userService.checkMobileNumberExit(loginID);
-		if (!isUserExist) {
-			userDto = this.userService.registerNewUser(userDto);
-			this.userService.generateOtp(mobileNo);
-			UserResponse logedInUser = (UserResponse) this.modelMapper.map(userDto, UserResponse.class);
-			response.setResultCode(ResultCode.OTP_SENT.getCode());
-			response.setMessage(ResultCode.OTP_SENT.getMessage());
-			response.setData(Arrays.asList(logedInUser));
-
-		} else {
-			response.setResultCode(ResultCode.USER_ALREADY_REGISTER.getCode());
-			response.setMessage(ResultCode.USER_ALREADY_REGISTER.getMessage());
-			response.setData(Collections.emptyList());
-		}
-		return ResponseEntity.ok(response);
-	}
+	/*
+	 * @PostMapping({ "/register" }) public ResponseEntity<Response>
+	 * registeredNewUser(@RequestBody UserDto userDto) {
+	 * userDto.setDcrptpassword(userDto.getPassword()); if (userDto.getName() ==
+	 * null) { userDto.setName(""); } String loginID = userDto.getLoginId(); String
+	 * mobileNo = userDto.getMobile(); Response response = new Response();
+	 * response.setErrorMessage(""); response.setStatus(HttpStatus.OK); boolean
+	 * isUserExist = this.userService.checkMobileNumberExit(loginID); if
+	 * (!isUserExist) { userDto = this.userService.registerNewUser(userDto);
+	 * this.userService.generateOtp(mobileNo); UserResponse logedInUser =
+	 * (UserResponse) this.modelMapper.map(userDto, UserResponse.class);
+	 * response.setResultCode(ResultCode.OTP_SENT.getCode());
+	 * response.setMessage(ResultCode.OTP_SENT.getMessage());
+	 * response.setData(Arrays.asList(logedInUser));
+	 * 
+	 * } else { response.setResultCode(ResultCode.USER_ALREADY_REGISTER.getCode());
+	 * response.setMessage(ResultCode.USER_ALREADY_REGISTER.getMessage());
+	 * response.setData(Collections.emptyList()); } return
+	 * ResponseEntity.ok(response); }
+	 */
 
 	public void authenticate(String username, String password) throws Exception {
 

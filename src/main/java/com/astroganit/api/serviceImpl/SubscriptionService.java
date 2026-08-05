@@ -1,93 +1,104 @@
 package com.astroganit.api.serviceImpl;
 
-import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.astroganit.api.entities.Plan;
+import com.astroganit.api.entities.User;
 import com.astroganit.api.entities.UserSubscription;
-import com.astroganit.api.payload.ResponseNew;
+import com.astroganit.api.exception.AppException;
 import com.astroganit.api.repository.PlanRepository;
 import com.astroganit.api.repository.SubscriptionRepository;
 import com.astroganit.api.repository.UserRepo;
-import com.astroganit.lib.panchang.util.AppResultConstant;
+import com.astroganit.api.response.VerifyPaymentResponse;
+import com.astroganit.api.util.ResultCode;
+import com.astroganit.lib.panchang.util.AppEnums;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class SubscriptionService {
 
 	private final SubscriptionRepository subscriptionRepository;
-	private final PlanRepository planRepository;
 	private final UserRepo userRepository;
+	private final PlanRepository planRepository;
 
-	public SubscriptionService(SubscriptionRepository subscriptionRepository, PlanRepository planRepository,
-			UserRepo userRepository) {
+	private static final Logger log = LoggerFactory.getLogger(SubscriptionService.class);
+
+	public SubscriptionService(SubscriptionRepository subscriptionRepository, UserRepo userRepository,
+			PlanRepository planRepository) {
 		this.subscriptionRepository = subscriptionRepository;
-		this.planRepository = planRepository;
 		this.userRepository = userRepository;
-	}
-
-	public UserSubscription activateSubscription(long userId, int planId, int durationDays, String paymentId) {
-
-		// ✅ 2. Create a new subscription
-		UserSubscription subscription = new UserSubscription();
-		subscription.setUserId(userId);
-		subscription.setPlanId(planId);
-		subscription.setStartDate(LocalDateTime.now());
-		subscription.setEndDate(LocalDateTime.now().plusDays(durationDays));
-		subscription.setStatus("active");
-		subscription.setPaymentId(Long.valueOf(paymentId));
-
-		return subscriptionRepository.save(subscription);
+		this.planRepository = planRepository;
 	}
 
 	@Transactional
-	public ResponseNew<UserSubscription> getActiveSubscription(long id, String loginId) {
+	public VerifyPaymentResponse getActiveSubscription() {
+		User user = getLoggedInUser();
+		UserSubscription subscription = subscriptionRepository.findByUserId(user.getId()).orElse(null);
 
-		ResponseNew<UserSubscription> response = new ResponseNew<UserSubscription>();
-		response.setErrorMessage("");
-		response.setStatus(HttpStatus.OK);
-		try {
-			Long userId = id;
-			if (userId <= 0) {
-				userId = userRepository.findUserIdByLoginId(loginId);
-				if (userId == null) {
-					throw new RuntimeException("User not found");
-				}
-			}
+		if (subscription != null && subscription.getEndDate().isBefore(LocalDateTime.now())
+				&& !AppEnums.SubscriptionStatus.EXPIRED.name().equals(subscription.getStatus())) {
 
-			UserSubscription userSubscription = subscriptionRepository.findByUserId(userId).orElse(null);
-			if (userSubscription != null && userSubscription.getEndDate().isBefore(LocalDateTime.now())) {
-				userSubscription.setStatus("EXPIRED");
-				subscriptionRepository.save(userSubscription);
-			}
+			subscription.setStatus(AppEnums.SubscriptionStatus.EXPIRED.name());
+			subscriptionRepository.save(subscription);
+		}
 
-			// UserSubscription userSubscription =
-			// subscriptionRepository.findByUserIdAndStatus(userId, "active");
-			if (userSubscription != null) {
-				response.setResultCode(AppResultConstant.SUCCESSFUL);
-				response.setMessage("Successfully");
-				response.setData(userSubscription);
-			} else {
-				response.setResultCode(AppResultConstant.SUBSCRIPTION_NOT_FOUND);
-				response.setMessage("Subscription not found.");
-			}
+		return mapToVerifyResponse(subscription);
+	}
 
-		} catch (Exception e) {
-			response.setResultCode(AppResultConstant.EXCEPTION);
-			response.setErrorMessage(e.getMessage());
+	@Transactional
+	public VerifyPaymentResponse getActiveSubscription(User user) {
+
+		UserSubscription subscription = subscriptionRepository.findByUserId(user.getId()).orElse(null);
+
+		if (subscription != null && subscription.getEndDate().isBefore(LocalDateTime.now())
+				&& !AppEnums.SubscriptionStatus.EXPIRED.name().equals(subscription.getStatus())) {
+
+			subscription.setStatus(AppEnums.SubscriptionStatus.EXPIRED.name());
+			subscriptionRepository.save(subscription);
+		}
+		System.out.println("verifyOtpV2-8");
+		return mapToVerifyResponse(subscription);
+	}
+
+	// 🔐 Common method to get logged-in user
+	private User getLoggedInUser() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+		if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+			throw new AppException(ResultCode.UNAUTHORIZED);
+		}
+
+		String loginId = auth.getName();
+		log.info("Logged in user: {}", loginId);
+
+		return userRepository.findByLoginId(loginId).orElseThrow(() -> new AppException(ResultCode.USER_NOT_FOUND));
+	}
+
+	private VerifyPaymentResponse mapToVerifyResponse(UserSubscription subscription) {
+
+		VerifyPaymentResponse response = new VerifyPaymentResponse();
+		if (subscription != null) {
+			response.setSubscriptionId(subscription.getId());
+			response.setPlanId(subscription.getPlanId());
+			Plan plan = planRepository.findById(subscription.getPlanId()).orElse(null);
+			response.setPlanName(plan != null ? plan.getNameEn() : "");
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			response.setStartDate(subscription.getStartDate().format(formatter));
+			response.setEndDate(subscription.getEndDate().format(formatter));
+			response.setStatus(subscription.getStatus());
+			response.setAutoRenew(Boolean.TRUE.equals(subscription.getAutoRenew()));
+			response.setHasSubscription(true);
+		} else {
+			response.setHasSubscription(false);
 		}
 
 		return response;
 	}
 
-	public ResponseNew<List<Plan>> getActivePlans() {
-		ResponseNew<List<Plan>> response = new ResponseNew<List<Plan>>();
-		response.setErrorMessage("");
-		response.setStatus(HttpStatus.OK);
-		response.setResultCode(AppResultConstant.SUCCESSFUL);
-		response.setMessage("Successfully");
-		response.setData(planRepository.findByIsActiveTrue());
-		return response;
-	}
 }

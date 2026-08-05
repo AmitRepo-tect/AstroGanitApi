@@ -2,11 +2,15 @@ package com.astroganit.api.controller;
 
 import org.springframework.web.bind.annotation.*;
 import com.astroganit.api.entities.UserSubscription;
+import com.astroganit.api.exception.AppException;
 import com.astroganit.api.model.CreateOrderRequest;
 import com.astroganit.api.model.RazorpayOrderDto;
+import com.astroganit.api.model.RazorpayOrderResponse;
 import com.astroganit.api.model.VerifyPaymentRequest;
 import com.astroganit.api.payload.ResponseNew;
+import com.astroganit.api.response.VerifyPaymentResponse;
 import com.astroganit.api.serviceImpl.PaymentService;
+import com.astroganit.api.util.ResultCode;
 import com.astroganit.lib.panchang.util.AppResultConstant;
 import com.astroganit.lib.panchang.util.Util;
 import com.razorpay.RazorpayException;
@@ -16,8 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-
 
 @RestController
 @RequestMapping("/api/payment")
@@ -32,49 +34,42 @@ public class PaymentController {
 	private String razorpayWebhookSecret;
 
 	@PostMapping("/create-order")
-	public ResponseEntity<ResponseNew<RazorpayOrderDto>> createOrder(@RequestBody CreateOrderRequest createOrderRequest)
-			throws RazorpayException {
-		ResponseNew<RazorpayOrderDto> response = new ResponseNew<RazorpayOrderDto>();
-		response.setErrorMessage("");
+	public ResponseEntity<ResponseNew<RazorpayOrderResponse>> createOrder(
+			@RequestBody CreateOrderRequest createOrderRequest) {
+		RazorpayOrderResponse order = paymentService.createOrderSafely(createOrderRequest);
+		ResponseNew<RazorpayOrderResponse> response = new ResponseNew<>();
 		response.setStatus(HttpStatus.OK);
-		try {
-			RazorpayOrderDto order = paymentService.createOrderSafely(createOrderRequest);
-			response.setResultCode(AppResultConstant.SUCCESSFUL);
-			response.setMessage("Successfully");
-			response.setData(order);
-		} catch (Exception e) {
-			response.setResultCode(AppResultConstant.EXCEPTION);
-			response.setErrorMessage(e.getMessage());
-		}
-
+		response.setStatusCode(HttpStatus.OK.value());
+		response.setResultCode(ResultCode.SUCCESS.getCode());
+		response.setMessage(ResultCode.SUCCESS.getMessage());
+		response.setErrorMessage("");
+		response.setData(order);
 		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping("/verify")
-	public ResponseEntity<ResponseNew<UserSubscription>> verifyPayment(@RequestBody VerifyPaymentRequest request) {
-		ResponseNew<UserSubscription> response = new ResponseNew<UserSubscription>();
-		response.setErrorMessage("");
-		response.setStatus(HttpStatus.OK);
-		try {
-			// 1️⃣ VERIFY SIGNATURE (SECURITY)
-			boolean isValid = Util.verifySignature(request.getRazorpayOrderId() + "|" + request.getRazorpayPaymentId(),
-					request.getRazorpaySignature(), razorpayKeySecret);
+	public ResponseEntity<ResponseNew<VerifyPaymentResponse>> verifyPayment(@RequestBody VerifyPaymentRequest request) {
 
-			if (!isValid) {
-				response.setResultCode(AppResultConstant.EXCEPTION);
-				response.setErrorMessage("Invalid payment signature");
-				return ResponseEntity.ok(response);
-			}
+		// 1️⃣ Verify Razorpay Signature
+		boolean isValid = Util.verifySignature(request.getRazorpayOrderId() + "|" + request.getRazorpayPaymentId(),
+				request.getRazorpaySignature(), razorpayKeySecret);
 
-			// 2️⃣ FINALIZE PAYMENT (BUSINESS)
-			UserSubscription userSubscription = paymentService.finalizePayment(request.getRazorpayOrderId(),
-					request.getRazorpayPaymentId());
-			response.setMessage("Successfully");
-			response.setData(userSubscription);
-		} catch (Exception e) {
-			response.setResultCode(AppResultConstant.EXCEPTION);
-			response.setErrorMessage(e.getMessage());
+		if (!isValid) {
+			throw new AppException(ResultCode.INVALID_PAYMENT_SIGNATURE);
 		}
+
+		// 2️⃣ Finalize Payment
+		VerifyPaymentResponse verifyPaymentResponse = paymentService.finalizePayment(request.getRazorpayOrderId(),
+				request.getRazorpayPaymentId());
+
+		// 3️⃣ Success Response
+		ResponseNew<VerifyPaymentResponse> response = new ResponseNew<>();
+		response.setMessage("Successfully");
+		response.setErrorMessage("");
+		response.setResultCode(ResultCode.SUCCESS.getCode());
+		response.setStatus(HttpStatus.OK);
+		response.setStatusCode(HttpStatus.OK.value());
+		response.setData(verifyPaymentResponse);
 
 		return ResponseEntity.ok(response);
 	}

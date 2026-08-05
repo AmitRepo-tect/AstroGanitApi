@@ -3,11 +3,9 @@ package com.astroganit.api.entities;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import jakarta.persistence.Entity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -24,10 +22,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
+	private static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	@Column(name = "login_id", length = 50)
+	@Column(name = "login_id", length = 15)
 	private String loginId;
 	@Column(name = "user_name", length = 100)
 	private String name;
@@ -39,6 +38,12 @@ public class User implements UserDetails {
 	private Date updatedDate;
 	@Column(name = "user_active")
 	private boolean userActive;
+	@Column(name = "deleted", nullable = false)
+	private boolean deleted = false;
+	@Column(name = "deleted_date")
+	private Date deletedDate;
+	@Column(name = "delete_after")
+	private Date deleteAfter;
 	private String about;
 	private String dcrptpassword;
 	private String gender;
@@ -85,17 +90,52 @@ public class User implements UserDetails {
 	private String appVersion;
 	@Column(name = "android_version")
 	private String androidVersion;
-	@ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
-	@JoinTable(name = "user_role", joinColumns = {
-			@JoinColumn(name = "user", referencedColumnName = "id") }, inverseJoinColumns = {
-					@JoinColumn(name = "role", referencedColumnName = "id") })
-	private Set<Role> roles = new HashSet();
 
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user"), inverseJoinColumns = @JoinColumn(name = "role"))
+	private Set<Role> roles = new HashSet<>();
+
+	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		List<SimpleGrantedAuthority> authorties = (List) this.roles.stream().map((role) -> {
-			return new SimpleGrantedAuthority(role.getName());
-		}).collect(Collectors.toList());
-		return null;
+		return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+	}
+
+	@Override
+	public String getUsername() {
+		return loginId;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
+
+	@Override
+	public String getPassword() {
+		return password;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
 	}
 
 	public String getLoginId() {
@@ -106,311 +146,304 @@ public class User implements UserDetails {
 		this.loginId = loginId;
 	}
 
-	public String getUsername() {
-		return this.mobile;
-	}
-
-	public boolean isAccountNonExpired() {
-		return true;
-	}
-
-	public boolean isAccountNonLocked() {
-		return true;
-	}
-
-	public boolean isCredentialsNonExpired() {
-		return true;
-	}
-
-	public boolean isEnabled() {
-		return true;
-	}
-
-	public long getId() {
-		return this.id;
-	}
-
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
-	public String getEmail() {
-		return this.email;
-	}
-
-	public String getPassword() {
-		return this.password;
-	}
-
-	public Date getCreatedDate() {
-		return this.createdDate;
-	}
-
-	public Date getUpdatedDate() {
-		return this.updatedDate;
-	}
-
-	public boolean isUserActive() {
-		return this.userActive;
-	}
-
-	public String getAbout() {
-		return this.about;
-	}
-
-	public String getDcrptpassword() {
-		return this.dcrptpassword;
-	}
-
-	public String getGender() {
-		return this.gender;
-	}
-
-	public String getPlace() {
-		return this.place;
-	}
-
-	public String getCountry() {
-		return this.country;
-	}
-
-	public String getState() {
-		return this.state;
-	}
-
-	public String getMobile() {
-		return this.mobile;
-	}
-
-	public String getMobilecc() {
-		return this.mobilecc;
-	}
-
-	public String getDayBirth() {
-		return this.dayBirth;
-	}
-
-	public String getMonthBirth() {
-		return this.monthBirth;
-	}
-
-	public String getYearBirth() {
-		return this.yearBirth;
-	}
-
-	public String getHourBirth() {
-		return this.hourBirth;
-	}
-
-	public String getMinuteBirth() {
-		return this.minuteBirth;
-	}
-
-	public String getSecondBirth() {
-		return this.secondBirth;
-	}
-
-	public String getLatitude() {
-		return this.latitude;
-	}
-
-	public String getLatDeg() {
-		return this.latDeg;
-	}
-
-	public String getLatMin() {
-		return this.latMin;
-	}
-
-	public String getLatNS() {
-		return this.latNS;
-	}
-
-	public String getLongitude() {
-		return this.longitude;
-	}
-
-	public String getLongDeg() {
-		return this.longDeg;
-	}
-
-	public String getLongMin() {
-		return this.longMin;
-	}
-
-	public String getLongEW() {
-		return this.longEW;
-	}
-
-	public String getTimeZone() {
-		return this.timeZone;
-	}
-
-	public boolean isUserVerified() {
-		return this.userVerified;
-	}
-
-	public String getMaritalStatus() {
-		return this.maritalStatus;
-	}
-
-	public String getDeviceId() {
-		return this.deviceId;
-	}
-
-	public String getAppVersion() {
-		return this.appVersion;
-	}
-
-	public String getAndroidVersion() {
-		return this.androidVersion;
-	}
-
-	public Set<Role> getRoles() {
-		return this.roles;
-	}
-
-	public void setId(final long id) {
-		this.id = id;
-	}
-
-	public void setName(final String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 
-	public void setEmail(final String email) {
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
 		this.email = email;
 	}
 
-	public void setPassword(final String password) {
-		this.password = password;
+	public Date getCreatedDate() {
+		return createdDate;
 	}
 
-	public void setCreatedDate(final Date createdDate) {
+	public void setCreatedDate(Date createdDate) {
 		this.createdDate = createdDate;
 	}
 
-	public void setUpdatedDate(final Date updatedDate) {
+	public Date getUpdatedDate() {
+		return updatedDate;
+	}
+
+	public void setUpdatedDate(Date updatedDate) {
 		this.updatedDate = updatedDate;
 	}
 
-	public void setUserActive(final boolean userActive) {
+	public boolean isUserActive() {
+		return userActive;
+	}
+
+	public void setUserActive(boolean userActive) {
 		this.userActive = userActive;
 	}
 
-	public void setAbout(final String about) {
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
+
+	public Date getDeletedDate() {
+		return deletedDate;
+	}
+
+	public void setDeletedDate(Date deletedDate) {
+		this.deletedDate = deletedDate;
+	}
+
+	public Date getDeleteAfter() {
+		return deleteAfter;
+	}
+
+	public void setDeleteAfter(Date deleteAfter) {
+		this.deleteAfter = deleteAfter;
+	}
+
+	public String getAbout() {
+		return about;
+	}
+
+	public void setAbout(String about) {
 		this.about = about;
 	}
 
-	public void setDcrptpassword(final String dcrptpassword) {
+	public String getDcrptpassword() {
+		return dcrptpassword;
+	}
+
+	public void setDcrptpassword(String dcrptpassword) {
 		this.dcrptpassword = dcrptpassword;
 	}
 
-	public void setGender(final String gender) {
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
 		this.gender = gender;
 	}
 
-	public void setPlace(final String place) {
+	public String getPlace() {
+		return place;
+	}
+
+	public void setPlace(String place) {
 		this.place = place;
 	}
 
-	public void setCountry(final String country) {
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
 		this.country = country;
 	}
 
-	public void setState(final String state) {
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
 		this.state = state;
 	}
 
-	public void setMobile(final String mobile) {
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
 		this.mobile = mobile;
 	}
 
-	public void setMobilecc(final String mobilecc) {
+	public String getMobilecc() {
+		return mobilecc;
+	}
+
+	public void setMobilecc(String mobilecc) {
 		this.mobilecc = mobilecc;
 	}
 
-	public void setDayBirth(final String dayBirth) {
+	public String getDayBirth() {
+		return dayBirth;
+	}
+
+	public void setDayBirth(String dayBirth) {
 		this.dayBirth = dayBirth;
 	}
 
-	public void setMonthBirth(final String monthBirth) {
+	public String getMonthBirth() {
+		return monthBirth;
+	}
+
+	public void setMonthBirth(String monthBirth) {
 		this.monthBirth = monthBirth;
 	}
 
-	public void setYearBirth(final String yearBirth) {
+	public String getYearBirth() {
+		return yearBirth;
+	}
+
+	public void setYearBirth(String yearBirth) {
 		this.yearBirth = yearBirth;
 	}
 
-	public void setHourBirth(final String hourBirth) {
+	public String getHourBirth() {
+		return hourBirth;
+	}
+
+	public void setHourBirth(String hourBirth) {
 		this.hourBirth = hourBirth;
 	}
 
-	public void setMinuteBirth(final String minuteBirth) {
+	public String getMinuteBirth() {
+		return minuteBirth;
+	}
+
+	public void setMinuteBirth(String minuteBirth) {
 		this.minuteBirth = minuteBirth;
 	}
 
-	public void setSecondBirth(final String secondBirth) {
+	public String getSecondBirth() {
+		return secondBirth;
+	}
+
+	public void setSecondBirth(String secondBirth) {
 		this.secondBirth = secondBirth;
 	}
 
-	public void setLatitude(final String latitude) {
+	public String getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(String latitude) {
 		this.latitude = latitude;
 	}
 
-	public void setLatDeg(final String latDeg) {
+	public String getLatDeg() {
+		return latDeg;
+	}
+
+	public void setLatDeg(String latDeg) {
 		this.latDeg = latDeg;
 	}
 
-	public void setLatMin(final String latMin) {
+	public String getLatMin() {
+		return latMin;
+	}
+
+	public void setLatMin(String latMin) {
 		this.latMin = latMin;
 	}
 
-	public void setLatNS(final String latNS) {
+	public String getLatNS() {
+		return latNS;
+	}
+
+	public void setLatNS(String latNS) {
 		this.latNS = latNS;
 	}
 
-	public void setLongitude(final String longitude) {
+	public String getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(String longitude) {
 		this.longitude = longitude;
 	}
 
-	public void setLongDeg(final String longDeg) {
+	public String getLongDeg() {
+		return longDeg;
+	}
+
+	public void setLongDeg(String longDeg) {
 		this.longDeg = longDeg;
 	}
 
-	public void setLongMin(final String longMin) {
+	public String getLongMin() {
+		return longMin;
+	}
+
+	public void setLongMin(String longMin) {
 		this.longMin = longMin;
 	}
 
-	public void setLongEW(final String longEW) {
+	public String getLongEW() {
+		return longEW;
+	}
+
+	public void setLongEW(String longEW) {
 		this.longEW = longEW;
 	}
 
-	public void setTimeZone(final String timeZone) {
+	public String getTimeZone() {
+		return timeZone;
+	}
+
+	public void setTimeZone(String timeZone) {
 		this.timeZone = timeZone;
 	}
 
-	public void setUserVerified(final boolean userVerified) {
+	public boolean isUserVerified() {
+		return userVerified;
+	}
+
+	public void setUserVerified(boolean userVerified) {
 		this.userVerified = userVerified;
 	}
 
-	public void setMaritalStatus(final String maritalStatus) {
+	public String getMaritalStatus() {
+		return maritalStatus;
+	}
+
+	public void setMaritalStatus(String maritalStatus) {
 		this.maritalStatus = maritalStatus;
 	}
 
-	public void setDeviceId(final String deviceId) {
+	public String getDeviceId() {
+		return deviceId;
+	}
+
+	public void setDeviceId(String deviceId) {
 		this.deviceId = deviceId;
 	}
 
-	public void setAppVersion(final String appVersion) {
+	public String getAppVersion() {
+		return appVersion;
+	}
+
+	public void setAppVersion(String appVersion) {
 		this.appVersion = appVersion;
 	}
 
-	public void setAndroidVersion(final String androidVersion) {
+	public String getAndroidVersion() {
+		return androidVersion;
+	}
+
+	public void setAndroidVersion(String androidVersion) {
 		this.androidVersion = androidVersion;
 	}
 
-	public void setRoles(final Set<Role> roles) {
+	public Set<Role> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
 	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 }

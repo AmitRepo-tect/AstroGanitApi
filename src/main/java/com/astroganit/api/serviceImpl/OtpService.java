@@ -13,8 +13,8 @@ import com.astroganit.api.repository.OtpRepository;
 import com.astroganit.api.util.HUtil;
 import com.astroganit.api.util.ResultCode;
 import com.astroganit.api.util.SendSMS;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OtpService {
@@ -28,6 +28,22 @@ public class OtpService {
 		this.otpRepository = otpRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.sendSMS = sendSMS;
+	}
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void incrementAttempts(Long otpId) {
+		int updated = otpRepository.incrementAttempts(otpId);
+
+		if (updated == 0) {
+			throw new AppException(ResultCode.OTP_NOT_FOUND);
+		}
+
+		/*
+		 * OtpNew otp = otpRepository.findByIdForUpdate(otpId).orElseThrow(() -> new
+		 * AppException(ResultCode.OTP_NOT_FOUND));
+		 * 
+		 * otp.setAttempts(otp.getAttempts() + 1);
+		 */
 	}
 
 	/**
@@ -62,22 +78,20 @@ public class OtpService {
 
 		// 🔒 Check max OTPs sent
 		if (otp.getSendCount() >= OTP_LIMIT) {
-			throw new AppException(ResultCode.LIMIT_REACHED.getCode(),
-					"Maximum OTP requests reached. Please try again later.");
+			throw new AppException(ResultCode.LIMIT_REACHED);
 		}
 
 		// ⏱️ Cooldown check
 		if (otp.getLastSentAt() != null && otp.getLastSentAt().isAfter(now.minusSeconds(OTP_COOLDOWN_SEC))) {
 			long secondsLeft = OTP_COOLDOWN_SEC - Duration.between(otp.getLastSentAt(), now).getSeconds();
-			throw new AppException(ResultCode.TOO_SOON.getCode(),
-					"OTP already sent. Please wait " + secondsLeft + " seconds before requesting a new one.");
+			throw new AppException(ResultCode.TOO_SOON);
 		}
 
 		// 📩 Send OTP via SMS
 		try {
-			//sendSMS.sendOtp(mobile, otpValue);
+			// sendSMS.sendOtp(mobile, otpValue);
 		} catch (Exception e) {
-			throw new AppException(ResultCode.SMS_ERROR.getCode(), "Failed to send OTP. Please try again.");
+			throw new AppException(ResultCode.SMS_ERROR);
 		}
 
 		// 🔐 Hash and store OTP
@@ -92,6 +106,6 @@ public class OtpService {
 		otpRepository.save(otp);
 
 		// Return plain OTP for response if needed (for testing only)
-		
+
 	}
 }

@@ -21,4 +21,6 @@ public interface UserRepo extends JpaRepository<User, Long> {
 
 	@Query("SELECT u.id FROM User u WHERE u.loginId = :loginId")
 	Long findUserIdByLoginId(@Param("loginId") String loginId);
+	
+	Optional<User> findByLoginIdAndDeletedFalse(String loginId);
 }
