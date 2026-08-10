@@ -16,7 +16,6 @@ import com.astroganit.api.repository.OTPRepo;
 import com.astroganit.api.repository.OtpRepository;
 import com.astroganit.api.repository.RoleRepo;
 import com.astroganit.api.repository.UserRepo;
-import com.astroganit.api.service.UserServiceV2;
 import com.astroganit.api.service.UserService;
 import com.astroganit.api.util.HUtil;
 import com.astroganit.api.util.ResultCode;
@@ -111,7 +110,6 @@ public class UserServiceImpl implements UserService {
 	public void generateOtp(String mobile) {
 		LocalDateTime now = LocalDateTime.now();
 		String otpValue = HUtil.getRandomNumberString();
-		System.out.println(otpValue);
 		OtpNew otp = (OtpNew) this.otpRepository.findByMobile(mobile).orElseGet(() -> {
 			OtpNew o = new OtpNew();
 			o.setMobile(mobile);

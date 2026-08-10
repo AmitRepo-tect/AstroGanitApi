@@ -1,23 +1,10 @@
 package com.astroganit.api.payload;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-
 public class UserResponse {
-	private int id;
+	private long id;
 	private String loginId;
-	@NotEmpty
-	@NotNull
-	@Size(min = 3, message = "user name must be min of 3 char !!")
 	private String name;
-	@Email
-	@NotEmpty
 	private String email;
-	@NotNull
 	private String about;
 	private String gender;
 	private String place;
@@ -25,41 +12,28 @@ public class UserResponse {
 	private String state;
 	private String mobile;
 	private String mobilecc;
-	@JsonProperty
 	private String dayBirth;
-	@JsonProperty
 	private String monthBirth;
-	@JsonProperty
 	private String yearBirth;
-	@JsonProperty
 	private String hourBirth;
-	@JsonProperty
 	private String minuteBirth;
-	@JsonProperty
 	private String secondBirth;
 	private String latitude;
-	@JsonProperty
 	private String latDeg;
-	@JsonProperty
 	private String latMin;
-	@JsonProperty
 	private String latNS;
-	@JsonProperty
 	private String longitude;
-	@JsonProperty
 	private String longDeg;
-	@JsonProperty
 	private String longMin;
-	@JsonProperty
 	private String longEW;
-	@JsonProperty
 	private String timeZone;
-	@JsonProperty
 	private boolean userVerified;
-	@JsonProperty
 	private String maritalStatus;
 
-	public int getId() {
+	public UserResponse() {
+	}
+
+	public long getId() {
 		return this.id;
 	}
 
@@ -71,7 +45,6 @@ public class UserResponse {
 		this.loginId = loginId;
 	}
 
-	@NotNull
 	public String getName() {
 		return this.name;
 	}
@@ -80,7 +53,6 @@ public class UserResponse {
 		return this.email;
 	}
 
-	@NotNull
 	public String getAbout() {
 		return this.about;
 	}
@@ -177,11 +149,11 @@ public class UserResponse {
 		return this.maritalStatus;
 	}
 
-	public void setId(final int id) {
+	public void setId(final long id) {
 		this.id = id;
 	}
 
-	public void setName(@NotNull final String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -189,7 +161,7 @@ public class UserResponse {
 		this.email = email;
 	}
 
-	public void setAbout(@NotNull final String about) {
+	public void setAbout(final String about) {
 		this.about = about;
 	}
 
@@ -217,32 +189,26 @@ public class UserResponse {
 		this.mobilecc = mobilecc;
 	}
 
-	@JsonProperty
 	public void setDayBirth(final String dayBirth) {
 		this.dayBirth = dayBirth;
 	}
 
-	@JsonProperty
 	public void setMonthBirth(final String monthBirth) {
 		this.monthBirth = monthBirth;
 	}
 
-	@JsonProperty
 	public void setYearBirth(final String yearBirth) {
 		this.yearBirth = yearBirth;
 	}
 
-	@JsonProperty
 	public void setHourBirth(final String hourBirth) {
 		this.hourBirth = hourBirth;
 	}
 
-	@JsonProperty
 	public void setMinuteBirth(final String minuteBirth) {
 		this.minuteBirth = minuteBirth;
 	}
 
-	@JsonProperty
 	public void setSecondBirth(final String secondBirth) {
 		this.secondBirth = secondBirth;
 	}
@@ -251,52 +217,42 @@ public class UserResponse {
 		this.latitude = latitude;
 	}
 
-	@JsonProperty
 	public void setLatDeg(final String latDeg) {
 		this.latDeg = latDeg;
 	}
 
-	@JsonProperty
 	public void setLatMin(final String latMin) {
 		this.latMin = latMin;
 	}
 
-	@JsonProperty
 	public void setLatNS(final String latNS) {
 		this.latNS = latNS;
 	}
 
-	@JsonProperty
 	public void setLongitude(final String longitude) {
 		this.longitude = longitude;
 	}
 
-	@JsonProperty
 	public void setLongDeg(final String longDeg) {
 		this.longDeg = longDeg;
 	}
 
-	@JsonProperty
 	public void setLongMin(final String longMin) {
 		this.longMin = longMin;
 	}
 
-	@JsonProperty
 	public void setLongEW(final String longEW) {
 		this.longEW = longEW;
 	}
 
-	@JsonProperty
 	public void setTimeZone(final String timeZone) {
 		this.timeZone = timeZone;
 	}
 
-	@JsonProperty
 	public void setUserVerified(final boolean userVerified) {
 		this.userVerified = userVerified;
 	}
 
-	@JsonProperty
 	public void setMaritalStatus(final String maritalStatus) {
 		this.maritalStatus = maritalStatus;
 	}

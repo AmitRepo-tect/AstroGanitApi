@@ -56,7 +56,8 @@ public enum ResultCode {
 	INVALID_PAYMENT(31,""),
 	INVALID_PAYMENT_SIGNATURE(32,""),
 	ACCOUNT_PENDING_DELETION(33, "Account is pending deletion."),
-	ACCOUNT_NOT_PENDING_DELETION(34, "Account is not pending deletion.");
+	ACCOUNT_NOT_PENDING_DELETION(34, "Account is not pending deletion."),
+	PROFILE_FETCH_SUCCESSFUL(35, "Profile fetched successfully");
 	private final int code;
 	private final String message;
 

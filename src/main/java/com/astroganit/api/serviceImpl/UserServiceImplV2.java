@@ -3,6 +3,7 @@ package com.astroganit.api.serviceImpl;
 import com.astroganit.api.entities.OtpNew;
 import com.astroganit.api.entities.User;
 import com.astroganit.api.exception.AppException;
+import com.astroganit.api.mapper.UserMapper;
 import com.astroganit.api.payload.DeleteAccountResponse;
 import com.astroganit.api.payload.LoginOtpResponse;
 import com.astroganit.api.payload.LoginRequestDto;
@@ -16,6 +17,7 @@ import com.astroganit.api.repository.UserRepo;
 import com.astroganit.api.service.UserServiceV2;
 import com.astroganit.api.util.HUtil;
 import com.astroganit.api.util.ResultCode;
+import com.astroganit.api.util.SendSMS;
 import com.astroganit.security.JwtTokenHelper;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
@@ -23,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +46,8 @@ public class UserServiceImplV2 implements UserServiceV2 {
 	@Autowired
 	private ModelMapper modelMapper;
 	@Autowired
+	private UserMapper userMapper;
+	@Autowired
 	private OtpRepository otpRepository;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -58,6 +63,8 @@ public class UserServiceImplV2 implements UserServiceV2 {
 	private String reviewMobile;
 	@Value("${playstore.review.otp}")
 	private String reviewOtp;
+	@Autowired
+	private SendSMS sendSMS;
 	/*
 	 * @Autowired private StringRedisTemplate redisTemplate;
 	 */
@@ -68,7 +75,6 @@ public class UserServiceImplV2 implements UserServiceV2 {
 	final int OTP_COOLDOWN_SEC = 30; // seconds
 	private static final String DEFAULT_PASSWORD = "astro_2026";
 
-	// ----Version V2 Api-----
 	private void forTest(String loginId, ResultCode error) {
 		if (loginId.equals("9015469060")) {
 			throw new AppException(error);
@@ -78,7 +84,7 @@ public class UserServiceImplV2 implements UserServiceV2 {
 	/* Start login Api */
 	@Override
 	@Transactional
-	public ResponseNew<LoginOtpResponse> requestLoginOtp2(LoginRequestDto loginRequestDto) {
+	public ResponseNew<LoginOtpResponse> requestLoginOtp(LoginRequestDto loginRequestDto) {
 
 		// forTest(loginRequestDto.getLoginId(),ResultCode.ACCOUNT_PENDING_DELETION);
 		validateLoginRequest(loginRequestDto);
@@ -155,7 +161,7 @@ public class UserServiceImplV2 implements UserServiceV2 {
 	/* Start Verify OTP */
 	@Override
 	@Transactional
-	public ResponseNew<LoginResponse> verifyOtpV2(String mobile, String otpCode) {
+	public ResponseNew<LoginResponse> verifyOtp(String mobile, String otpCode) {
 		// forTest(mobile, ResultCode.USER_NOT_FOUND);
 
 		// Play Store review account
@@ -234,20 +240,13 @@ public class UserServiceImplV2 implements UserServiceV2 {
 	/* start Delete user */
 	@Override
 	@Transactional
-	public ResponseNew<DeleteAccountResponse> deleteUserV2() {
+	public ResponseNew<DeleteAccountResponse> deleteUser() {
 
 		ResponseNew<DeleteAccountResponse> response = new ResponseNew<DeleteAccountResponse>();
 		response.setStatus(HttpStatus.OK);
 
 		User user = getAuthenticatedUser();
-
-		// Already deleted
-		if (user.isDeleted()) {
-			throw new AppException(ResultCode.ACCOUNT_PENDING_DELETION);
-		}
-
 		Date now = new Date();
-
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(now);
 		calendar.add(Calendar.DAY_OF_MONTH, 30); // Grace period
@@ -272,12 +271,23 @@ public class UserServiceImplV2 implements UserServiceV2 {
 	/* End Delete user */
 
 	private User getAuthenticatedUser() {
+
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+
+		if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken
+				|| auth.getName() == null || auth.getName().isBlank()) {
+
 			throw new AppException(ResultCode.UNAUTHORIZED);
 		}
 
-		return userRepo.findByLoginId(auth.getName()).orElseThrow(() -> new AppException(ResultCode.USER_NOT_FOUND));
+		User user = userRepo.findByLoginId(auth.getName())
+				.orElseThrow(() -> new AppException(ResultCode.USER_NOT_FOUND));
+
+		if (user.isDeleted()) {
+			throw new AppException(ResultCode.ACCOUNT_PENDING_DELETION);
+		}
+
+		return user;
 	}
 
 	private <T> ResponseNew<T> createSuccessResponse(T data, String message) {
@@ -299,19 +309,11 @@ public class UserServiceImplV2 implements UserServiceV2 {
 		}
 	}
 
-	@Override
-	public ResponseNew<UserResponse> updateUserProfileV1(UserDto user) {
-		// TODO Auto-generated method stub
-		return null;
+	/* Strat Resend Otp and Generate Otp */
+	public void generateOtp(String mobile) {
+		sendOtp(mobile, null);
 	}
 
-	@Override
-	public ResponseNew<UserResponse> getUserProfile() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* Strat Resend Otp */
 	@Override
 	@Transactional
 	public ResponseNew<ResendOtpResponse> resendOTP(String mobile, boolean restoreFlow) {
@@ -356,8 +358,6 @@ public class UserServiceImplV2 implements UserServiceV2 {
 
 	}
 
-	/* End Resend Otp */
-
 	private OtpNew sendOtp(String mobile, Runnable extraValidation) {
 
 		if (extraValidation != null) {
@@ -375,8 +375,9 @@ public class UserServiceImplV2 implements UserServiceV2 {
 		validateCooldown(otp, now);
 
 		String otpValue = HUtil.getRandomNumberString();
+		System.out.println(otpValue);
 
-		// sendSMS.sendOtp(mobile, otpValue);
+		sendSMS.sendOtp(mobile, otpValue);
 
 		updateOtp(otp, otpValue, now);
 
@@ -428,8 +429,25 @@ public class UserServiceImplV2 implements UserServiceV2 {
 		otp.setSendCount(otp.getSendCount() + 1);
 	}
 
-	public void generateOtp(String mobile) {
-		sendOtp(mobile, null);
+	/* End Resend Otp and Generate Otp */
+
+	/* Start Update and get Profile */
+	@Transactional
+	@Override
+	public ResponseNew<UserResponse> updateUserProfile(UserDto userDto) {
+		if (userDto == null) {
+			throw new AppException(ResultCode.INVALID_PARAMETER);
+		}
+		User user = getAuthenticatedUser();
+		userMapper.updateUserFromDto(userDto, user);
+		user.setUpdatedDate(new Date());
+		return createSuccessResponse(userMapper.toResponse(user), ResultCode.PROFILE_UPDATE_SUCCESSFUL.getMessage());
 	}
 
+	@Override
+	public ResponseNew<UserResponse> getUserProfile() {
+		User user = getAuthenticatedUser();
+		return createSuccessResponse(userMapper.toResponse(user), ResultCode.PROFILE_FETCH_SUCCESSFUL.getMessage());
+	}
+	/* End Update and get Profile */
 }
